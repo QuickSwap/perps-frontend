@@ -25,7 +25,7 @@
 .Modal-content {
   z-index: 20;
   position: relative;
-  max-width: 100%;
+  max-width: 95%;
   max-height: 90vh;
   overflow: auto;
   background: #1B1E29;

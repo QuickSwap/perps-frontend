@@ -1,0 +1,336 @@
+.dividends-content {
+  padding-top: 30px;
+}
+ .dividends-content p,
+ .dividends-content h1{
+    margin: 0;
+ }
+.dividens-header-container{
+    background: #1B1E29;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 16px;
+    padding: 20px;
+    border-radius: 10px;
+}
+@media (min-width: 1024px) {
+    .dividens-header-container{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 40px;
+        padding: 24px;
+    }
+  
+}
+.dividens-header-item{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.dividens-header-item-content{
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+@media (min-width: 576px)  {
+    .dividens-header-item-content{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+  
+}
+.dividens-header-item-content-label{
+    font-size: 15px;
+    font-weight: 600;
+    color: rgb(255 255 255 / 0.75);
+}
+.dividens-header-item-content-value{
+    font-size: 19px;
+    font-weight: 500;
+    color: #fff;
+}
+.dividens-content-container{
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 15px;
+    color: #fff;
+}
+@media (min-width: 1024px)  {
+    .dividens-content-container {
+        flex-direction: row;
+        gap: 30px;
+    }
+}
+.dividens-card{
+    background: #1B1E29;
+    border-radius: 10px;
+    padding: 16px 20px;
+}
+.dividens-card-title{
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+}
+@media (min-width: 1024px) {
+  .dividens-card {
+    flex-basis: 49%;
+    padding: 24px;
+  }
+}
+.epoch-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.epoch-row .left{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    width: 100%;
+}
+.token-icon{
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+.epoch-content{
+    width: 100%;
+}
+.epoch-content h1{
+    font-size: 15px;
+    font-weight: 600;
+    color: rgb(255 255 255 / 0.75);
+}
+.epoch-content p {
+  font-size: 19px;
+  font-weight: 500;
+  margin-top: 5px;
+}
+.epoch-content hr {
+  color: rgba(234, 234, 234, 0.15);
+  margin: 0;
+  margin-top: 20px;
+  height: 1px;
+}
+.allocation-header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+@media (min-width: 576px) {
+  .allocation-header {
+    flex-direction: row;
+  }
+
+}
+
+.unstake-btn{
+    background-color: rgba(118, 118, 128, 0.24) !important;
+    margin: 5px;
+    width: 115px !important;
+    margin-left: auto;
+}
+.stake-btn{
+    width: 115px !important;
+}
+.allocation-list{
+    background-color: rgba(118, 118, 128, 0.24);
+    border-radius: 15px;
+    padding: 0 16px;
+    font-size: 15px;
+    line-height: 23px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgb(255 255 255 / 0.75);
+}
+.list-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0;
+}
+.list-row:not(:first-child) {
+    border-top:1px solid;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+.list-row p:first-child {
+  font-weight: 400;
+  margin: 0;
+}
+.list-row p:last-child{
+    font-weight: 500;
+    margin: 0;
+}
+.claim-all-btn{
+    width: auto !important;
+    justify-content: space-between;
+}
+.claim-modal-container{
+    background-color: #171633;
+    position: absolute;
+    right: 0;
+    display: flex;
+    height: 88px;
+    width: 240px;
+    flex-direction: column;
+    justify-content: space-around;
+    border-radius: 10px;
+    z-index: 10;
+}
+.claim-modal-container button{
+    background-color: transparent;
+    display: flex;
+    gap:18px;
+    align-items: center;
+    padding: 10px;
+    border: none;
+    color: #fff;
+}
+
+.DividendsAllocateModal .modalWrapper{
+    color: #fff;
+    padding: 30px;
+    padding-top: 0;
+    border-color: rgba(255, 255, 255, 0.15);
+    border-width: 1px;
+    border-radius: 30px;
+    overflow: hidden;
+    
+}
+@media (min-width: 1024px) {
+  .DividendsAllocateModal .modalWrapper {
+    width: 640px;
+  }
+
+}
+.DividendsAllocateModal  .Modal-title {
+    font-weight: 600;
+    font-size: 30px;
+    margin: 0;
+}
+.DividendsAllocateModal .Modal-title-bar{
+    padding: 30px 30px 22px 30px;
+}
+.DividendsAllocateModal .modal-close {
+    padding: 10px;
+    background-color: rgba(118, 118, 128, 0.24);
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: auto;
+}
+.dividends-modal-content {
+    width: 100%;
+    padding-bottom: 20px;
+    border-top: 1px solid #282D3D;
+}
+.dividends-modal-content h2{
+    margin: 0;
+    margin-bottom: 10px;
+    padding-top: 20px;
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.50);
+}
+.dividends-input {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    color: rgba(255, 255, 255, 0.50);
+    letter-spacing: -0.03em;
+    line-height: 46px;
+    font-weight: 500;
+    font-size: 38px;
+    padding:17px ;
+    background-color: #282D3D;
+    border-style: none;
+    border-radius:10px;
+    width: 100%;
+    margin-bottom: 15px;
+}
+.balance-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+@media (min-width: 576px) {
+    .balance-container{
+        flex-direction: row;
+    }
+
+}
+.balance-container .balance{
+    display: flex;
+    flex-direction: row;
+    flex-basis: 100%;
+}
+@media (min-width: 576px)  {
+    .balance-container .balance {
+        flex-direction: column;
+        flex-basis: 30%;
+    }
+  
+}
+.balance-container .selector{
+    padding-top: 20px;
+    flex-basis: 70%;
+    flex: none;
+}
+.balance-title{
+    padding-top: 0;
+    color: rgba(255, 255, 255, 0.50);
+    font-size: 15px;
+    margin: 0;
+}
+.balance-value {
+    padding-left: 10px;
+    color: rgba(255, 255, 255, 0.50);
+    font-size: 15px;
+    margin: 0;
+}
+@media (min-width: 576px) {
+    .balance-title {
+        padding-top: 10px;
+    }
+    .balance-value{
+        padding-left: 0;
+    }
+}
+.PercentageSelector{
+   
+    letter-spacing: -0.02em;
+    line-height: 23px;
+    font-weight: 600;
+    font-size: 15px;
+    gap: 8px;
+    justify-content: space-around;
+    align-items: center;
+    display: flex;
+    margin-bottom: 15px;
+}
+@media (min-width: 1200px)  {
+    .PercentageSelector{
+        margin-bottom: 0;
+    }
+}
+.SelectorButton{
+     color: #fff;
+    padding: 5px 15px;
+    background-color: #282D3D;
+    border-radius: 50px;
+    white-space: nowrap;
+    user-select: none;
+    border: none !important;
+}
+.footer-btns{
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}

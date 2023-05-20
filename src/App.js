@@ -54,6 +54,7 @@ import BuyQlp from "./views/BuyQlp/BuyQlp";
 import SellQlp from "./views/SellQlp/SellQlp";
 import BeginAccountTransfer from "./views/BeginAccountTransfer/BeginAccountTransfer";
 import CompleteAccountTransfer from "./views/CompleteAccountTransfer/CompleteAccountTransfer";
+import Dividends from './views/Dividends/Dividends'
 
 import cx from "classnames";
 import { cssTransition, ToastContainer } from "react-toastify";
@@ -703,6 +704,9 @@ function FullApp() {
                 setPendingTxns={setPendingTxns}
                 connectWallet={connectWallet}
               />
+            </Route>
+            <Route exact path="/dividends">
+               <Dividends connectWallet={connectWallet} />
             </Route>
             <Route exact path="/sell_qlp">
               <SellQlp

@@ -21,6 +21,11 @@ export default function HeaderNav() {
         </NavLink>
       </div>
       <div className="App-header-link-container">
+        <NavLink activeClassName="active" to="/dividends">
+          Dividends
+          </NavLink>
+      </div>
+      <div className="App-header-link-container">
         <NavLink activeClassName="active" to="/referrals">
           Referrals
         </NavLink>
