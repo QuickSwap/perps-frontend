@@ -118,24 +118,24 @@ export default function Dividends(props) {
                             </div>
                             <div className='allocation-list'>
                                 <div className='list-row'>
-                                    <p>Total allocation</p>
+                                    <p>Your allocation</p>
                                     <p>123 QLP </p>
                                 </div>
                                 <div className='allocation-list-divider'></div>
                                 <div className='list-row'>
-                                    <p>Total Share</p>
+                                    <p>Your share</p>
                                     <p>123 % </p>
                                 </div>
                                 <div className='allocation-list-divider'></div>
                                 <div className='list-row'>
-                                    <p>QLP Staked</p>
+                                    <p>Available to stake</p>
                                     <p>123  </p>
                                 </div>
-                                <div className='allocation-list-divider'></div>
+                                {/* <div className='allocation-list-divider'></div>
                                 <div className='list-row'>
                                     <p>QLP not Staked</p>
                                     <p>123  </p>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div style={{marginTop:24}}>

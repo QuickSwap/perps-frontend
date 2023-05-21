@@ -51,7 +51,6 @@
     color: #EBECF2;
 }
 .dividens-content-container{
-    margin-top: 30px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -68,6 +67,7 @@
     background: #1B1E29;
     border-radius: 20px;
     padding: 16px 20px;
+    height: fit-content;
 }
 .dividens-card-title{
     font-size: 20px;
@@ -78,6 +78,7 @@
   .dividens-card {
     flex-basis: 49%;
     padding: 24px;
+    min-height: 468px;
   }
 }
 .epoch-row{
@@ -85,6 +86,9 @@
     justify-content: space-between;
     align-items: center;
     position: relative;
+}
+.epoch-row:last-child{
+    border: none !important;
 }
 .epoch-row .left{
     display: flex;
@@ -122,7 +126,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
 }
 @media (min-width: 576px) {
   .allocation-header {
@@ -155,7 +159,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 24px 0;
+    padding: 16px 0;
 }
 .allocation-list-divider{
     height: 1px;
