@@ -2,16 +2,26 @@ import * as React from "react";
 
 function Icon() {
   return (
-    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="64" height="64" rx="32" fill="white" fillOpacity="0.1" />
-      <path
-        d="M40.8166 44.1353C38.2539 45.9972 35.1676 47 31.9999 47C28.8322 47 25.7458 45.9972 23.1831 44.1353M38.5754 18.5181C41.4225 19.9067 43.7569 22.161 45.2441 24.9579C46.7312 27.7548 47.2947 30.9507 46.8539 34.0876M17.146 34.0875C16.7051 30.9506 17.2687 27.7547 18.7558 24.9578C20.2429 22.1609 22.5773 19.9066 25.4245 18.5179M40.2499 32C40.2499 36.5564 36.5562 40.25 31.9999 40.25C27.4435 40.25 23.7499 36.5564 23.7499 32C23.7499 27.4437 27.4435 23.75 31.9999 23.75C36.5562 23.75 40.2499 27.4437 40.2499 32Z"
-        stroke="#FFAA27"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+      <svg xmlns="http://www.w3.org/2000/svg"  width="48" height="48" viewBox="0 0 48 48">
+          <defs>
+              <linearGradient id="linear-gradient" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+                  <stop offset="0" stop-color="#10596f" />
+                  <stop offset="1" stop-color="#1a9fc0" />
+              </linearGradient>
+          </defs>
+          <g id="组_27627" data-name="组 27627" transform="translate(-560 -217)">
+              <rect id="矩形_23165" data-name="矩形 23165" width="48" height="48" rx="24" transform="translate(560 217)" fill="#282d3d" />
+              <g id="Layer_2" data-name="Layer 2" transform="translate(569.6 226.6)" style={{ isolation: "isolate" }}>
+                  <g id="invisible_box" data-name="invisible box">
+                      <rect id="矩形_23178" data-name="矩形 23178" width="28.8" height="28.8" fill="none" />
+                  </g>
+                  <g id="Q3_icons" data-name="Q3 icons" transform="translate(0.84 3.6)">
+                      <path id="路径_16165" data-name="路径 16165" d="M22.76,6H7.16L1.4,13.26,14.96,28.8,28.52,13.26ZM8.66,14.4l3.12,7.08L5.6,14.4Zm2.64,0h7.32l-3.66,8.4Zm9.96,0h3.06l-6.18,7.08Zm.3-6L24.44,12H20.96L19.1,8.4Zm-5.16,0L18.26,12h-6.6l1.86-3.6Zm-8.04,0h2.46L8.96,12H5.48Z" transform="translate(-1.4 -6)" fill="url(#linear-gradient)" />
+                  </g>
+              </g>
+          </g>
+      </svg>
+
   );
 }
 

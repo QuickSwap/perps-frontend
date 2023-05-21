@@ -1,8 +1,8 @@
 import React from 'react'
 
-export default function EpochRow({ tokenImage,name,value,actionEle }) {
+export default function EpochRow({ tokenImage, name, value, actionEle, isCollectEle }) {
   return (
-      <div className="epoch-row">
+      <div className="epoch-row" style={{ borderBottom: !actionEle && '1px solid #272D3D'}}>
           <div className='left'>
               <div className="token-icon">
                   <img
@@ -16,10 +16,10 @@ export default function EpochRow({ tokenImage,name,value,actionEle }) {
               <div className="epoch-content">
                   <h1>{name}</h1>
                   <p>
-                      {value}
-                      <span style={{ color: 'rgb(255 255 255 / 0.75)' }}>(${value})</span>
+                      <span style={{fontSize:17,}}>{value}</span>
+                      <span style={{ color: '#696C80' }}>(${value})</span>
                   </p>
-                  {!actionEle && <hr />}
+                  { isCollectEle}
               </div>
           </div>
           {actionEle}

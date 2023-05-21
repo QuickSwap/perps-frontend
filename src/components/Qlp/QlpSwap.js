@@ -671,7 +671,7 @@ export default function QlpSwap(props) {
     <div className="QlpSwap">
       <div className="QlpSwap-content">
         <div className="App-card QlpSwap-stats-card">
-          <div className="App-card-title">
+          <div className="App-card-title" style={{marginBottom:24}}>
             <div className="App-card-title-mark">
               <div className="App-card-title-mark-icon">
                 <img style={{ width: 48, height: 48 }} src={qlp40Icon} alt="qlp40Icon" />
@@ -687,81 +687,47 @@ export default function QlpSwap(props) {
               <div className="label">Price</div>
               <div className="value">${formatAmount(qlpPrice, USD_DECIMALS, QPXQLP_DISPLAY_DECIMALS, true)}</div>
             </div>
+            <div className="App-card-row" style={{marginTop:12}}>
+              <div className="label">APR</div>
+              <div className="value flex">
+                <span className="positive" style={{ marginRight: 6 }}>
+                  {quickAPR.toLocaleString()}%
+                </span>
+                <TooltipWithPortal
+                  handle={<img src={AIRDROPAPR} alt='airdrop APR' width={24} />}
+                  position="right-bottom"
+                  renderContent={() => <>Eth fee APR: {formatAmount(totalApr, 2, 2, true)}%<br /><br />Quick airdrop APR: {quickAPR.toLocaleString()}%</>}
+                />
+
+              </div>
+            </div>
+
+          </div>
+          <div className="App-card-content">
             <div className="App-card-row">
-              <div className="label">Wallet</div>
+              <div className="label">In Wallet</div>
               <div className="value">
                 {formatAmount(qlpBalance, QLP_DECIMALS, 4, true)} QLP ($
                 {formatAmount(qlpBalanceUsd, USD_DECIMALS, 2, true)})
               </div>
             </div>
+          </div>
+          <div className="App-card-content">
+            <div className="App-card-row" style={{ paddingBottom: 28 }}>
+              <div className="label">Staked</div>
+              <div className="value">...</div>
+            </div>
             <div className="App-card-row">
-                          <div className="label">Unstake</div>
-                          <div className="value">...</div>
-                      </div>
-                      <div className="App-card-row">
-                          <div className="label">APR</div>
-                          <div className="value flex">
-                              <span className="positive" style={{ marginRight: 6 }}>
-                                  {quickAPR.toLocaleString()}%
-                              </span>
-                              <TooltipWithPortal
-                                  handle={<img src={AIRDROPAPR} alt='airdrop APR' width={24} />}
-                                  position="right-bottom"
-                                  renderContent={() => <>Eth fee APR: {formatAmount(totalApr, 2, 2, true)}%<br /><br />Quick airdrop APR: {quickAPR.toLocaleString()}%</>}
-                              />
-                              {/* <Tooltip
-                  className="positive"
-                  handle={`${formatAmount(totalApr, 2, 2, true)}%`}
-                  position="right-bottom"
-                  renderContent={() => {
-                    return (
-                      <>
-                        <div className="Tooltip-row">
-                          <span className="label">
-                            {nativeTokenSymbol} ({wrappedTokenSymbol}) APR
-                          </span>
-                          <span>{formatAmount(feeQlpTrackerApr, 2, 2, false)}%</span>
-                        </div>
-                        <div className="Tooltip-row">
-                          <span className="label">Escrowed QPX APR</span>
-                          <span>{formatAmount(stakedQlpTrackerApr, 2, 2, false)}%</span>
-                        </div>
-                      </>
-                    );
-                  }}
-                /> */}
-                          </div>
-                      </div>
-                      <div className="App-card-row">
-                          <div className="label">Total Supply</div>
-                          <div className="value">
-                              {formatAmount(qlpSupply, QLP_DECIMALS, 4, true)} QLP ($
-                              {formatAmount(qlpSupplyUsd, USD_DECIMALS, 2, true)})
-                          </div>
-                      </div>
-                  </div>
-                  
-          <div className="App-card-divider"></div>
-          {/* <div className="App-card-content"> */}
-            {/* {!isBuying && (
-              <div className="App-card-row">
-                <div className="label">Reserved</div>
-                <div className="value">
-                  <Tooltip
-                    handle={`${formatAmount(reservedAmount, 18, 4, true)} QLP ($${formatAmount(
-                      reserveAmountUsd,
-                      USD_DECIMALS,
-                      2,
-                      true
-                    )})`}
-                    position="right-bottom"
-                    renderContent={() => `${formatAmount(reservedAmount, 18, 4, true)} Reserved QLP for vesting.`}
-                  />
-                </div>
+              <div className="label">Total Supply</div>
+              <div className="value">
+                {formatAmount(qlpSupply, QLP_DECIMALS, 4, true)} QLP ($
+                {formatAmount(qlpSupplyUsd, USD_DECIMALS, 2, true)})
               </div>
-            )} */}
-            
-          {/* </div> */}
+            </div>
+          </div>
+
+          <div className="App-card-divider"></div>
+          
         </div>
         <div className="QlpSwap-box App-box basis-mobile">
           <Tab

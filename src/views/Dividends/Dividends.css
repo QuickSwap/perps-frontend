@@ -11,7 +11,7 @@
     grid-template-columns: repeat(1, minmax(0, 1fr));
     gap: 16px;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 20px;
 }
 @media (min-width: 1024px) {
     .dividens-header-container{
@@ -41,14 +41,14 @@
   
 }
 .dividens-header-item-content-label{
-    font-size: 15px;
-    font-weight: 600;
-    color: rgb(255 255 255 / 0.75);
+    font-size: 14px;
+    font-weight: 500;
+    color: #696C80;
 }
 .dividens-header-item-content-value{
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 500;
-    color: #fff;
+    color: #EBECF2;
 }
 .dividens-content-container{
     margin-top: 30px;
@@ -66,12 +66,12 @@
 }
 .dividens-card{
     background: #1B1E29;
-    border-radius: 10px;
+    border-radius: 20px;
     padding: 16px 20px;
 }
 .dividens-card-title{
-    font-size: 30px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     letter-spacing: -0.03em;
 }
 @media (min-width: 1024px) {
@@ -95,24 +95,24 @@
 }
 .token-icon{
     padding: 12px;
-    background: rgba(255, 255, 255, 0.1);
+    background: #282D3D;
     border-radius: 50%;
 }
 .epoch-content{
     width: 100%;
+    font-weight: 500;
+    color: #EBECF2;
 }
 .epoch-content h1{
-    font-size: 15px;
-    font-weight: 600;
-    color: rgb(255 255 255 / 0.75);
+    font-size: 16px;
 }
 .epoch-content p {
-  font-size: 19px;
-  font-weight: 500;
+  font-size: 14px;
+  
   margin-top: 5px;
 }
 .epoch-content hr {
-  color: rgba(234, 234, 234, 0.15);
+  color: #272D3D;
   margin: 0;
   margin-top: 20px;
   height: 1px;
@@ -132,19 +132,20 @@
 }
 
 .unstake-btn{
-    background-color: rgba(118, 118, 128, 0.24) !important;
+    background-color: #3E4252 !important;
     margin: 5px;
     width: 115px !important;
     margin-left: auto;
+    margin-right: 16px;
 }
 .stake-btn{
     width: 115px !important;
 }
 .allocation-list{
-    background-color: rgba(118, 118, 128, 0.24);
-    border-radius: 15px;
+    background-color: #272D3D;
+    border-radius: 20px;
     padding: 0 16px;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 23px;
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -156,21 +157,26 @@
     justify-content: space-between;
     padding: 24px 0;
 }
-.list-row:not(:first-child) {
-    border-top:1px solid;
-    border-color: rgba(255, 255, 255, 0.15);
+.allocation-list-divider{
+    height: 1px;
+    background-color: #696C80;
+    opacity: 0.3;
+    width: 100%;
 }
 .list-row p:first-child {
   font-weight: 400;
   margin: 0;
+  color: #696C80;
 }
 .list-row p:last-child{
-    font-weight: 500;
+    font-weight: 400;
     margin: 0;
+    color: #C7CAD9;
 }
 .claim-all-btn{
     width: auto !important;
     justify-content: space-between;
+    background: #3E4252 !important;
 }
 .claim-modal-container{
     background-color: #171633;
@@ -333,4 +339,45 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+}
+
+.collect-switch{
+    border-color: transparent;
+    border-radius: 9999px;
+    cursor: pointer;
+    width: 42px;
+    height: 24px;
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+}
+.bg-enabled {
+  background-color: #282D3D;
+}
+.bg-disabled {
+  background-color: rgba(39, 45, 61, 0.7);
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+.translate-x-9 {
+    transform:translateX(14px)
+}
+.translate-x-0 {
+  transform: translateX(-4px)
+}
+
+.switch-thumb{
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    pointer-events: none;
+    border-radius: 9999px;
+}
+.enabled-thumb{
+    background-color: #448AFF;
+}
+.disabled-thumb {
+  background-color: #696C80;
 }
