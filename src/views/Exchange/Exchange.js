@@ -505,6 +505,7 @@ export const Exchange = forwardRef((props, ref) => {
   );
 
   const { infoTokens } = useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo);
+  console.log(infoTokens);
   const { minExecutionFee, minExecutionFeeUSD, minExecutionFeeErrorMessage } = useMinExecutionFee(
     library,
     active,
