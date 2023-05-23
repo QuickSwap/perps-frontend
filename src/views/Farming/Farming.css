@@ -204,7 +204,7 @@
     color: #fff;
 }
 
-.DividendsAllocateModal .modalWrapper{
+.FarmingAllocateModal .modalWrapper{
     color: #fff;
     padding: 30px;
     padding-top: 0;
@@ -215,20 +215,20 @@
     
 }
 @media (min-width: 1024px) {
-  .DividendsAllocateModal .modalWrapper {
+  .FarmingAllocateModal .modalWrapper {
     width: 640px;
   }
 
 }
-.DividendsAllocateModal  .Modal-title {
+.FarmingAllocateModal  .Modal-title {
     font-weight: 600;
     font-size: 30px;
     margin: 0;
 }
-.DividendsAllocateModal .Modal-title-bar{
+.FarmingAllocateModal .Modal-title-bar{
     padding: 30px 30px 22px 30px;
 }
-.DividendsAllocateModal .modal-close {
+.FarmingAllocateModal .modal-close {
     padding: 10px;
     background-color: rgba(118, 118, 128, 0.24);
     border-radius: 50%;

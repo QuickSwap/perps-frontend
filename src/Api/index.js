@@ -1,10 +1,10 @@
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { gql } from "@apollo/client";
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 
 import OrderBook from "../abis/OrderBook.json";
-import Dividends from "../abis/Dividends.json";
+import Farming from "../abis/Farming.json";
 import PositionManager from "../abis/PositionManager.json";
 import Vault from "../abis/Vault.json";
 import Router from "../abis/Router.json";
@@ -103,8 +103,8 @@ export function useQuickInfo(chainId) {
 export async function dividendsAllocate(chainId, library, amount) {
   const params = [amount];
   const method = "allocate";
-  const dividensAddress = getContract(chainId, "Dividends");
-  const contract = new ethers.Contract(dividensAddress, Dividends.abi, library.getSigner());
+  const dividensAddress = getContract(chainId, "Farming");
+  const contract = new ethers.Contract(dividensAddress, Farming.abi, library.getSigner());
 
   return callContract(chainId, contract, method, params);
 }
@@ -112,8 +112,8 @@ export async function dividendsAllocate(chainId, library, amount) {
 export async function dividendsDeallocate(chainId, library, amount) {
   const params = [amount];
   const method = "deallocate";
-  const dividensAddress = getContract(chainId, "Dividends");
-  const contract = new ethers.Contract(dividensAddress, Dividends.abi, library.getSigner());
+  const dividensAddress = getContract(chainId, "Farming");
+  const contract = new ethers.Contract(dividensAddress, Farming.abi, library.getSigner());
 
   return callContract(chainId, contract, method, params);
 }
@@ -121,8 +121,8 @@ export async function dividendsDeallocate(chainId, library, amount) {
 export async function dividendsClaim(chainId, library, token, withdrawETH) {
   const params = [token, withdrawETH];
   const method = "harvestDividends";
-  const dividensAddress = getContract(chainId, "Dividends");
-  const contract = new ethers.Contract(dividensAddress, Dividends.abi, library.getSigner());
+  const dividensAddress = getContract(chainId, "Farming");
+  const contract = new ethers.Contract(dividensAddress, Farming.abi, library.getSigner());
 
   return callContract(chainId, contract, method, params);
 }
@@ -130,23 +130,22 @@ export async function dividendsClaim(chainId, library, token, withdrawETH) {
 export async function dividendsClaimAll(chainId, library, withdrawETH) {
   const params = [withdrawETH];
   const method = "harvestAllDividends";
-  const dividensAddress = getContract(chainId, "Dividends");
-  const contract = new ethers.Contract(dividensAddress, Dividends.abi, library.getSigner());
+  const dividensAddress = getContract(chainId, "Farming");
+  const contract = new ethers.Contract(dividensAddress, Farming.abi, library.getSigner());
 
   return callContract(chainId, contract, method, params);
 }
 
 //return 30decimal usd price
-export async function useQuickUsdPrice(){
-  try {
-    const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=quickswap&vs_currencies=usd");
-    const data = await response.json()
-    return BigNumber.from(Number(data["quickswap"]["usd"])*1e6).mul("1e24")
-  } catch (error) {
-    console.log("Error on useQuickUsdPrice", error);
-    return BigNumber.from(0.05*1e6).mul(1e24)
-  }
-  
+export function useQuickUsdPrice() {
+  const defaultPrice = expandDecimals(5, 28);
+  const fetcher = (url) => fetch(url).then((r) => r.json());
+
+  const { data, error } = useSWR("https://api.coingecko.com/api/v3/simple/price?ids=quickswap&vs_currencies=usd", {
+    dedupingInterval: 60000,
+    fetcher: fetcher,
+  });
+  return data ? expandDecimals(Number(data["quickswap"]["usd"]) * 1e6, 24) : defaultPrice;
 }
 
 export function useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo, vaultPropsLength) {

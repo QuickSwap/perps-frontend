@@ -8,7 +8,6 @@ import { useSafeAppConnection, SafeAppConnector } from '@gnosis.pm/safe-apps-web
 import Logo from './assets/logos/QuickswapLogo@2x.png'
 import qlp24Icon from "./img/ic_qlp_24.svg";
 import NotFound from "./404";
-import NewBadge from './assets/icons/new.svg'
 import { Web3ReactProvider, useWeb3React } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 
@@ -54,7 +53,7 @@ import BuyQlp from "./views/BuyQlp/BuyQlp";
 import SellQlp from "./views/SellQlp/SellQlp";
 import BeginAccountTransfer from "./views/BeginAccountTransfer/BeginAccountTransfer";
 import CompleteAccountTransfer from "./views/CompleteAccountTransfer/CompleteAccountTransfer";
-import Dividends from './views/Dividends/Dividends'
+import Farming from './views/Farming/Farming'
 
 import cx from "classnames";
 import { cssTransition, ToastContainer } from "react-toastify";
@@ -705,8 +704,8 @@ function FullApp() {
                 connectWallet={connectWallet}
               />
             </Route>
-            <Route exact path="/dividends">
-               <Dividends connectWallet={connectWallet} />
+            <Route exact path="/farming">
+               <Farming connectWallet={connectWallet} />
             </Route>
             <Route exact path="/sell_qlp">
               <SellQlp

@@ -1405,13 +1405,12 @@ export const getContractCall = ({ provider, contractInfo, arg0, arg1, method, pa
     if (additionalArgs) {
       return contract[method](...params.concat(additionalArgs));
     }
-    return contract[method](...params);
+      return contract[method](...params);
   }
 
   if (!provider) {
     return;
   }
-
   return provider[method](arg1, ...params);
 };
 
