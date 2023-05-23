@@ -206,8 +206,7 @@
 
 .FarmingAllocateModal .modalWrapper{
     color: #fff;
-    padding: 30px;
-    padding-top: 0;
+    padding:0 16px 24px 16px;
     border-color: rgba(255, 255, 255, 0.15);
     border-width: 1px;
     border-radius: 30px;
@@ -216,17 +215,22 @@
 }
 @media (min-width: 1024px) {
   .FarmingAllocateModal .modalWrapper {
-    width: 640px;
+    width: 368px;
   }
 
 }
 .FarmingAllocateModal  .Modal-title {
-    font-weight: 600;
+    /* font-weight: 600;
     font-size: 30px;
-    margin: 0;
+    margin: 0; */
 }
 .FarmingAllocateModal .Modal-title-bar{
-    padding: 30px 30px 22px 30px;
+    padding: 16px;
+}
+.FarmingAllocateModal .Modal-body{
+    /* border-top: 1px solid rgba(27, 30, 41, 0.5); */
+    border-top: 1px solid #282D3D;
+    padding-top: 16px;
 }
 .FarmingAllocateModal .modal-close {
     padding: 10px;
@@ -253,15 +257,14 @@
     outline-offset: 2px;
     color: rgba(255, 255, 255, 0.50);
     letter-spacing: -0.03em;
-    line-height: 46px;
     font-weight: 500;
-    font-size: 38px;
+    font-size: 24px;
     padding:17px ;
     background-color: #282D3D;
     border-style: none;
     border-radius:10px;
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 .balance-container{
     display: flex;
@@ -288,25 +291,25 @@
   
 }
 .balance-container .selector{
-    padding-top: 20px;
+    /* padding-top: 20px; */
     flex-basis: 70%;
     flex: none;
 }
 .balance-title{
     padding-top: 0;
     color: rgba(255, 255, 255, 0.50);
-    font-size: 15px;
+    font-size: 14px;
     margin: 0;
 }
 .balance-value {
     padding-left: 10px;
     color: rgba(255, 255, 255, 0.50);
-    font-size: 15px;
+    font-size: 14px;
     margin: 0;
 }
 @media (min-width: 576px) {
     .balance-title {
-        padding-top: 10px;
+        /* padding-top: 10px; */
     }
     .balance-value{
         padding-left: 0;
@@ -331,15 +334,20 @@
 }
 .SelectorButton{
      color: #fff;
-    padding: 5px 15px;
-    background-color: #282D3D;
-    border-radius: 50px;
+    padding:2px 8px;
+    background-color: rgba(68,138,255,0.3);
+    color: #448aff;
+    border-radius: 10px;
     white-space: nowrap;
     user-select: none;
     border: none !important;
+    font-size: 12px;
+}
+.SelectorButton:hover{
+    opacity: 0.8;
 }
 .footer-btns{
-    margin-top: 24px;
+    /* margin-top: 24px; */
     display: flex;
     flex-direction: column;
     gap: 24px;

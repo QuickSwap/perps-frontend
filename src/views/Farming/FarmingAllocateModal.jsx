@@ -114,7 +114,7 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
     >
       <div id="modalWrapper" className="modalWrapper">
         <div className="farming-modal-content">
-          <h2>Amount</h2>
+
           <input
             className="farming-input"
             type="text"
@@ -124,9 +124,9 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
           />
           <div className="balance-container">
             <div className="balance">
-              <p className="balance-title ">Wallet Balance: </p>
+              <p className="balance-title ">{isAllocate ?"In Wallet":"Staked"}: </p>
               <p className="balance-value ">
-                {formatAmount(isAllocate ? qlpBalance : stakedQlpBalance, 18, 2, true)} QLP
+                {formatAmount(isAllocate ? qlpBalance : stakedQlpBalance, 18, 2, true)} 
               </p>
             </div>
             <div className="selector">
@@ -150,13 +150,13 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
             <button className="App-button-option" onClick={onClickPrimary} disabled={!isPrimaryEnabled()}>
               {getPrimaryText()}
             </button>
-            <button
+            {/* <button
               className="App-button-option"
               style={{ background: "transparent" }}
               onClick={() => setIsModalVisible(false)}
             >
               Cancel
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

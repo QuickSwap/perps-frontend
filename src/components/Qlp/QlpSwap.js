@@ -70,11 +70,13 @@ import arrowIcon from "../../img/ic_convert_down.svg";
 import "./QlpSwap.css";
 import AssetDropdown from "../../views/Dashboard/AssetDropdown";
 import { getImageUrl } from "../../cloudinary/getImageUrl";
+import FarmingAllocateModal from '../../views/Farming/FarmingAllocateModal'
 
 const { AddressZero } = ethers.constants;
 
 export default function QlpSwap(props) {
   const { savedSlippageAmount, isBuying, setPendingTxns, connectWallet, setIsBuying } = props;
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const history = useHistory();
   const swapLabel = isBuying ? "Add Liquidity" : "Withdraw Liquidity";
   const tabLabel = isBuying ? "Add Liquidity" : "Withdraw Liquidity";
@@ -638,16 +640,32 @@ export default function QlpSwap(props) {
 
   return (
     <div className="QlpSwap">
+      <FarmingAllocateModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        isAllocate={true}
+      />
       <div className="QlpSwap-content">
         <div className="App-card QlpSwap-stats-card">
           <div className="App-card-title" style={{ marginBottom: 24 }}>
-            <div className="App-card-title-mark">
+            <div className="App-card-title-mark" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <div className="App-card-title-mark-icon">
                 <img style={{ width: 48, height: 48 }} src={qlp40Icon} alt="qlp40Icon" />
               </div>
-              <div className="App-card-title-mark-info">
+              <div className="App-card-title-mark-info" style={{ marginRight: "auto" }}>
                 <div className="App-card-title-mark-title">QLP</div>
               </div>
+              {active &&<div>
+                <button
+                  className="App-button-option "
+                  style={{background:'rgba(68,138,251,0.24)',color:'#448aff',fontSize:16,fontWeight:500}}
+                  onClick={() => {
+                    setIsModalVisible(true);
+                  }}
+                >
+                  Stake your QLP
+                </button>
+              </div>}
             </div>
           </div>
           <div className="App-card-divider"></div>

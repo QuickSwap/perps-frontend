@@ -29,6 +29,7 @@ import { getContract } from "../../Addresses";
 import useSWR from "swr";
 
 export default function Farming(props) {
+  const { connectWallet } = props
   const { active, account, library } = useWeb3React();
   const { chainId } = useChainId();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -219,103 +220,116 @@ export default function Farming(props) {
             />
           </div>
           <div className="dividens-card " style={{ display: "flex", flexDirection: "column" }}>
-            <div>
-              <div className="allocation-header ">
-                <div className="dividens-card-title">Your allocation</div>
+            {active ?
+              <>
                 <div>
-                  <button
-                    className="App-button-option unstake-btn"
-                    onClick={() => {
-                      setIsModalVisible(true);
-                      setIsAllocate(false);
-                    }}
-                  >
-                    Unstake
-                  </button>
-                  <button
-                    className="App-button-option stake-btn"
-                    onClick={() => {
-                      setIsModalVisible(true);
-                      setIsAllocate(true);
-                    }}
-                  >
-                    Stake
-                  </button>
-                </div>
-              </div>
-              <div className="allocation-list">
-                <div className="list-row">
-                  <p>Your allocation</p>
-                  <p>{formatAmount(userAllocation, 18, 2, true)} QLP</p>
-                </div>
-                <div className="allocation-list-divider"></div>
-                <div className="list-row">
-                  <p>Your share</p>
-                  <p>
-                    {userAllocation && totalAllocation && totalAllocation.gt(0)
-                      ? formatAmount(userAllocation.mul(1000000).div(totalAllocation).toNumber(), 4, 2)
-                      : "..."}{" "}
-                    %{" "}
-                  </p>
-                </div>
-                <div className="allocation-list-divider"></div>
-                <div className="list-row">
-                  <p>Available to stake</p>
-                  <p>{formatAmount(qlpBalance, 18, 2, true)} </p>
-                </div>
-              </div>
-            </div>
-            <div style={{ marginTop: 24 }}>
-              <div className="allocation-header  ">
-                <div className="dividens-card-title">Your rewards</div>
-                <div style={{ position: "relative" }}>
-                  <button className="App-button-option claim-all-btn" onClick={() => setIsClaimAllModalOpen(true)}>
-                    Claim All
-                  </button>
-                  {isClaimAllModalOpen && (
-                    <div
-                      ref={claimAllModalRef}
-                      className="claim-modal-container"
-                      onBlur={() => setIsClaimAllModalOpen(false)}
-                    >
-                      <button onClick={() => handleClaimAll(false)}>
-                        <WETH /> Claim as WETH
+                  <div className="allocation-header ">
+                    <div className="dividens-card-title">Your allocation</div>
+                    <div>
+                      <button
+                        className="App-button-option unstake-btn"
+                        onClick={() => {
+                          setIsModalVisible(true);
+                          setIsAllocate(false);
+                        }}
+                      >
+                        Unstake
                       </button>
-                      <button onClick={() => handleClaimAll(true)}>
-                        <img src={ETH} alt="" /> Claim as ETH
+                      <button
+                        className="App-button-option stake-btn"
+                        onClick={() => {
+                          setIsModalVisible(true);
+                          setIsAllocate(true);
+                        }}
+                      >
+                        Stake
                       </button>
                     </div>
-                  )}
+                  </div>
+                  <div className="allocation-list">
+                    <div className="list-row">
+                      <p>Your allocation</p>
+                      <p>{formatAmount(userAllocation, 18, 2, true)} QLP</p>
+                    </div>
+                    <div className="allocation-list-divider"></div>
+                    <div className="list-row">
+                      <p>Your share</p>
+                      <p>
+                        {userAllocation && totalAllocation && totalAllocation.gt(0)
+                          ? formatAmount(userAllocation.mul(1000000).div(totalAllocation).toNumber(), 4, 2)
+                          : "..."}{" "}
+                        %{" "}
+                      </p>
+                    </div>
+                    <div className="allocation-list-divider"></div>
+                    <div className="list-row">
+                      <p>Available to stake</p>
+                      <p>{formatAmount(qlpBalance, 18, 2, true)} </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <EpochRow
-                  name={"ETH"}
-                  symbol={"WETH"}
-                  amount={pendingEthAmount}
-                  displayDecimals={4}
-                  isClaim={true}
-                  price={ethTokenInfo.minPrice}
-                  tokenAddress={ethAddress.address}
-                />
-                <EpochRow
-                  name={"MATIC"}
-                  symbol={"MATIC"}
-                  amount={pendingMaticAmount}
-                  isClaim={true}
-                  price={maticTokenInfo.minPrice}
-                  tokenAddress={maticAddress.address}
-                />
-                <EpochRow
-                  name={"QUICK"}
-                  symbol={"QUICK"}
-                  amount={pendingQuickAmount}
-                  isClaim={true}
-                  price={quickPrice}
-                  tokenAddress={quickAddress}
-                />
-              </div>
-            </div>
+                <div style={{ marginTop: 24 }}>
+                <div className="allocation-header  ">
+                  <div className="dividens-card-title">Your rewards</div>
+                  <div style={{ position: "relative" }}>
+                    <button className="App-button-option claim-all-btn" onClick={() => setIsClaimAllModalOpen(true)}>
+                      Claim All
+                    </button>
+                    {isClaimAllModalOpen && (
+                      <div
+                        ref={claimAllModalRef}
+                        className="claim-modal-container"
+                        onBlur={() => setIsClaimAllModalOpen(false)}
+                      >
+                        <button onClick={() => handleClaimAll(false)}>
+                          <WETH /> Claim as WETH
+                        </button>
+                        <button onClick={() => handleClaimAll(true)}>
+                          <img src={ETH} alt="" /> Claim as ETH
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <EpochRow
+                    name={"ETH"}
+                    symbol={"WETH"}
+                    amount={pendingEthAmount}
+                    displayDecimals={4}
+                    isClaim={true}
+                    price={ethTokenInfo.minPrice}
+                    tokenAddress={ethAddress.address}
+                  />
+                  <EpochRow
+                    name={"MATIC"}
+                    symbol={"MATIC"}
+                    amount={pendingMaticAmount}
+                    isClaim={true}
+                    price={maticTokenInfo.minPrice}
+                    tokenAddress={maticAddress.address}
+                  />
+                  <EpochRow
+                    name={"QUICK"}
+                    symbol={"QUICK"}
+                    amount={pendingQuickAmount}
+                    isClaim={true}
+                    price={quickPrice}
+                    tokenAddress={quickAddress}
+                  />
+                </div>
+                </div>
+              </>
+              :
+              <button
+                className="App-cta action-button"
+                style={{ marginTop: 30 }}
+                type="submit"
+                onClick={connectWallet}
+              >
+                Connect Wallet
+              </button>
+            }
           </div>
         </div>
       </div>
