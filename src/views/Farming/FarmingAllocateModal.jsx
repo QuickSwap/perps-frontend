@@ -118,7 +118,7 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
           <input
             className="farming-input"
             type="text"
-            placeholder="0.00 QLP"
+            placeholder="0.00"
             value={convertAmount}
             onChange={(e) => setConvertAmount(e.target.value)}
           />
@@ -147,7 +147,7 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
         </div>
         <div className="">
           <div className="footer-btns">
-            <button className="App-button-option" onClick={onClickPrimary} disabled={!isPrimaryEnabled()}>
+            <button className="App-button-option" style={{borderRadius:16}} onClick={onClickPrimary} disabled={!isPrimaryEnabled()}>
               {getPrimaryText()}
             </button>
             {/* <button

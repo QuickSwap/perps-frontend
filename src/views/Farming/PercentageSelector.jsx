@@ -16,7 +16,7 @@ const SelectorButton = ({ percentage, balance, setInputValue, }) => {
         }
         setInputValue(balancePercentage.toString());
       }}>
-      % {percentage}
+      {percentage === 100 ? 'MAX' : `${percentage}%`}  
     </button>
   );
 };
