@@ -100,7 +100,7 @@ export function useQuickInfo(chainId) {
   return res ? res.data.token : null;
 }
 
-export async function dividendsAllocate(chainId, library, amount) {
+export async function farmingStake(chainId, library, amount) {
   const params = [amount];
   const method = "allocate";
   const dividensAddress = getContract(chainId, "Farming");
@@ -109,7 +109,7 @@ export async function dividendsAllocate(chainId, library, amount) {
   return callContract(chainId, contract, method, params);
 }
 
-export async function dividendsDeallocate(chainId, library, amount) {
+export async function farmingUnstake(chainId, library, amount) {
   const params = [amount];
   const method = "deallocate";
   const dividensAddress = getContract(chainId, "Farming");
@@ -118,18 +118,18 @@ export async function dividendsDeallocate(chainId, library, amount) {
   return callContract(chainId, contract, method, params);
 }
 
-export async function dividendsClaim(chainId, library, token, withdrawETH) {
+export async function farmingClaim(chainId, library, token, withdrawETH) {
   const params = [token, withdrawETH];
-  const method = "harvestDividends";
+  const method = "harvestFarming";
   const dividensAddress = getContract(chainId, "Farming");
   const contract = new ethers.Contract(dividensAddress, Farming.abi, library.getSigner());
 
   return callContract(chainId, contract, method, params);
 }
 
-export async function dividendsClaimAll(chainId, library, withdrawETH) {
+export async function farmingClaimAll(chainId, library, withdrawETH) {
   const params = [withdrawETH];
-  const method = "harvestAllDividends";
+  const method = "harvestAllFarming";
   const dividensAddress = getContract(chainId, "Farming");
   const contract = new ethers.Contract(dividensAddress, Farming.abi, library.getSigner());
 

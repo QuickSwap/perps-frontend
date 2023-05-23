@@ -3,7 +3,7 @@ import * as React from "react";
 import PercentageSelector from "./PercentageSelector";
 import Modal from "../../components/Modal/Modal";
 import { approveTokens, fetcher, formatAmount, parseValue, useChainId } from "../../Helpers";
-import { dividendsAllocate, dividendsDeallocate } from "../../Api";
+import { farmingStake, farmingUnstake } from "../../Api";
 import { useWeb3React } from "@web3-react/core";
 import { getContract } from "../../Addresses";
 import useSWR from "swr";
@@ -17,10 +17,10 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
   const [isApproving, setIsApproving] = useState("");
   const [isStaking, setIsStaking] = useState("");
 
-  const dividendsAddress = getContract(chainId, "Farming");
+  const farmingAddress = getContract(chainId, "Farming");
   const qlpAddress = getContract(chainId, "QLP");
   const { data: qlpAllowance } = useSWR(account && [`QlpBalance:${active}`, chainId, qlpAddress, "allowance"], {
-    fetcher: fetcher(library, QLPAbi, [account, dividendsAddress]),
+    fetcher: fetcher(library, QLPAbi, [account, farmingAddress]),
   });
 
   const { data: qlpBalance } = useSWR(account && [`QlpBalance:${active}`, chainId, qlpAddress, "balanceOf"], {
@@ -28,7 +28,7 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
   });
 
   const { data: stakedQlpBalance } = useSWR(
-    account && [`usersAllocation:${active}`, chainId, dividendsAddress, "usersAllocation"],
+    account && [`usersAllocation:${active}`, chainId, farmingAddress, "usersAllocation"],
     {
       fetcher: fetcher(library, FarmingAbi, [account]),
     }
@@ -87,14 +87,14 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
         setIsApproving,
         library,
         tokenAddress: qlpAddress,
-        spender: dividendsAddress,
+        spender: farmingAddress,
         chainId,
       });
       return;
     }
 
     setIsStaking(true);
-    const stakingFunc = isAllocate ? dividendsAllocate : dividendsDeallocate;
+    const stakingFunc = isAllocate ? farmingStake : farmingUnstake;
     stakingFunc(chainId, library, convertAmountEth)
       .then()
       .catch()
@@ -113,10 +113,10 @@ const FarmingAllocateModal = ({ isAllocate, isModalVisible, setIsModalVisible })
       className="FarmingAllocateModal"
     >
       <div id="modalWrapper" className="modalWrapper">
-        <div className="dividends-modal-content">
+        <div className="farming-modal-content">
           <h2>Amount</h2>
           <input
-            className="dividends-input"
+            className="farming-input"
             type="text"
             placeholder="0.00 QLP"
             value={convertAmount}

@@ -23,7 +23,7 @@ import FarmingAbi from "../../abis/Farming.json";
 import QLPAbi from "../../abis/QLP.json";
 import QlpManager from "../../abis/QlpManager.json";
 
-import { dividendsClaimAll, useInfoTokens, useQuickUsdPrice } from "../../Api";
+import { farmingClaimAll, useInfoTokens, useQuickUsdPrice } from "../../Api";
 import { getTokenBySymbol } from "../../data/Tokens";
 import { getContract } from "../../Addresses";
 import useSWR from "swr";
@@ -34,7 +34,7 @@ export default function Farming(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAllocate, setIsAllocate] = useState(true);
 
-  const dividendsAddress = getContract(chainId, "Farming");
+  const farmingAddress = getContract(chainId, "Farming");
   const qlpAddress = getContract(chainId, "QLP");
   const ethAddress = getTokenBySymbol(chainId, "WETH");
   const quickAddress = getContract(chainId, "QUICK");
@@ -52,26 +52,26 @@ export default function Farming(props) {
     fetcher: fetcher(library, QlpManager, []),
   });
 
-  const { data: ethFarmingInfo } = useSWR([`ethFarmingInfo:${active}`, chainId, dividendsAddress, "dividendsInfo"], {
+  const { data: ethFarmingInfo } = useSWR([`ethFarmingInfo:${active}`, chainId, farmingAddress, "farmingInfo"], {
     fetcher: fetcher(library, FarmingAbi, [ethAddress.address]),
   });
 
   const { data: maticFarmingInfo } = useSWR(
-    [`maticFarmingInfo:${active}`, chainId, dividendsAddress, "dividendsInfo"],
+    [`maticFarmingInfo:${active}`, chainId, farmingAddress, "farmingInfo"],
     {
       fetcher: fetcher(library, FarmingAbi, [maticAddress.address]),
     }
   );
 
   const { data: quickFarmingInfo } = useSWR(
-    [`quickFarmingInfo:${active}`, chainId, dividendsAddress, "dividendsInfo"],
+    [`quickFarmingInfo:${active}`, chainId, farmingAddress, "farmingInfo"],
     {
       fetcher: fetcher(library, FarmingAbi, [quickAddress]),
     }
   );
 
   const { data: totalAllocation } = useSWR(
-    [`totalAllocation:${active}`, chainId, dividendsAddress, "totalAllocation"],
+    [`totalAllocation:${active}`, chainId, farmingAddress, "totalAllocation"],
     {
       fetcher: fetcher(library, FarmingAbi, []),
     }
@@ -86,28 +86,28 @@ export default function Farming(props) {
   });
 
   const { data: pendingEthAmount } = useSWR(
-    active && [`pendingDividendsAmount:eth:${active}`, chainId, dividendsAddress, "pendingDividendsAmount", ethAddress.address, account],
+    active && [`pendingFarmingAmount:eth:${active}`, chainId, farmingAddress, "pendingFarmingAmount", ethAddress.address, account],
     {
       fetcher: fetcher(library, FarmingAbi, []),
     }
   );
 
   const { data: pendingQuickAmount } = useSWR(
-    active && [`pendingDividendsAmount:quick:${active}`, chainId, dividendsAddress, "pendingDividendsAmount", quickAddress, account],
+    active && [`pendingFarmingAmount:quick:${active}`, chainId, farmingAddress, "pendingFarmingAmount", quickAddress, account],
     {
       fetcher: fetcher(library, FarmingAbi, []),
     }
   );
 
   const { data: pendingMaticAmount } = useSWR(
-    active && [`pendingDividendsAmount:matic:${active}`, chainId, dividendsAddress, "pendingDividendsAmount", maticAddress.address, account],
+    active && [`pendingFarmingAmount:matic:${active}`, chainId, farmingAddress, "pendingFarmingAmount", maticAddress.address, account],
     {
       fetcher: fetcher(library, FarmingAbi, []),
     }
   );
 
   const { data: userAllocation } = useSWR(
-    active && [`quickFarmingInfo:${active}`, chainId, dividendsAddress, "usersAllocation", account],
+    active && [`quickFarmingInfo:${active}`, chainId, farmingAddress, "usersAllocation", account],
     {
       fetcher: fetcher(library, FarmingAbi, []),
     }
@@ -145,7 +145,7 @@ export default function Farming(props) {
       : bigNumberify(0);
 
   function handleClaimAll(withdrawETH) {
-    dividendsClaimAll(chainId, library, withdrawETH);
+    farmingClaimAll(chainId, library, withdrawETH);
   }
 
   const {
@@ -155,7 +155,7 @@ export default function Farming(props) {
   } = useComponentVisible(false);
 
   return (
-    <div className="default-container dividends-content page-layout">
+    <div className="default-container farming-content page-layout">
       <FarmingAllocateModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}

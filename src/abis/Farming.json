@@ -75,7 +75,7 @@
           "type": "uint256"
         }
       ],
-      "name": "CycleDividendsPercentUpdated",
+      "name": "CycleFarmingPercentUpdated",
       "type": "event"
     },
     {
@@ -152,7 +152,7 @@
           "type": "uint256"
         }
       ],
-      "name": "DividendsAddedToPending",
+      "name": "FarmingAddedToPending",
       "type": "event"
     },
     {
@@ -177,7 +177,7 @@
           "type": "uint256"
         }
       ],
-      "name": "DividendsCollected",
+      "name": "FarmingCollected",
       "type": "event"
     },
     {
@@ -359,7 +359,7 @@
           "type": "uint256"
         }
       ],
-      "name": "addDividendsToPending",
+      "name": "addFarmingToPending",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -508,7 +508,7 @@
           "type": "address"
         }
       ],
-      "name": "dividendsInfo",
+      "name": "farmingInfo",
       "outputs": [
         {
           "internalType": "uint256",
@@ -532,7 +532,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "accDividendsPerShare",
+          "name": "accFarmingPerShare",
           "type": "uint256"
         },
         {
@@ -542,7 +542,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "cycleDividendsPercent",
+          "name": "cycleFarmingPercent",
           "type": "uint256"
         },
         {
@@ -575,7 +575,7 @@
           "type": "bool"
         }
       ],
-      "name": "harvestAllDividends",
+      "name": "harvestAllFarming",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -593,7 +593,7 @@
           "type": "bool"
         }
       ],
-      "name": "harvestDividends",
+      "name": "harvestFarming",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -619,7 +619,7 @@
     },
     {
       "inputs": [],
-      "name": "massUpdateDividendsInfo",
+      "name": "massUpdateFarmingInfo",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -682,7 +682,7 @@
           "type": "address"
         }
       ],
-      "name": "pendingDividendsAmount",
+      "name": "pendingFarmingAmount",
       "outputs": [
         {
           "internalType": "uint256",
@@ -785,7 +785,7 @@
           "type": "uint256"
         }
       ],
-      "name": "updateCycleDividendsPercent",
+      "name": "updateCycleFarmingPercent",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -811,7 +811,7 @@
           "type": "address"
         }
       ],
-      "name": "updateDividendsInfo",
+      "name": "updateFarmingInfo",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -833,7 +833,7 @@
       "outputs": [
         {
           "internalType": "uint256",
-          "name": "pendingDividends",
+          "name": "pendingFarming",
           "type": "uint256"
         },
         {

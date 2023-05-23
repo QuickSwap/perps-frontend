@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { getImageUrl } from "../../cloudinary/getImageUrl";
 import { Switch } from "@headlessui/react";
 import { bigNumberify, expandDecimals, formatAmount, useChainId } from "../../Helpers";
-import { dividendsClaim } from "../../Api";
+import { farmingClaim } from "../../Api";
 import { useWeb3React } from "@web3-react/core";
 
 export default function EpochRow({ name, symbol,tokenAddress,displayDecimals, amount, isClaim, price }) {
@@ -18,7 +18,7 @@ export default function EpochRow({ name, symbol,tokenAddress,displayDecimals, am
 
 
   function handleClaim() {
-    dividendsClaim(chainId, library, tokenAddress, !withdrawETH);
+    farmingClaim(chainId, library, tokenAddress, !withdrawETH);
   }
 
   return (

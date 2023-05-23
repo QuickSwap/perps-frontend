@@ -1,8 +1,8 @@
-.dividends-content {
+.farming-content {
   padding-top: 30px;
 }
- .dividends-content p,
- .dividends-content h1{
+ .farming-content p,
+ .farming-content h1{
     margin: 0;
  }
 .dividens-header-container{
@@ -235,12 +235,12 @@
     cursor: pointer;
     margin-left: auto;
 }
-.dividends-modal-content {
+.farming-modal-content {
     width: 100%;
     padding-bottom: 20px;
     border-top: 1px solid #282D3D;
 }
-.dividends-modal-content h2{
+.farming-modal-content h2{
     margin: 0;
     margin-bottom: 10px;
     padding-top: 20px;
@@ -248,7 +248,7 @@
     font-weight: 500;
     color: rgba(255, 255, 255, 0.50);
 }
-.dividends-input {
+.farming-input {
     outline: 2px solid transparent;
     outline-offset: 2px;
     color: rgba(255, 255, 255, 0.50);

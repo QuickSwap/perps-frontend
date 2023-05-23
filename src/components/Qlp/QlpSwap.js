@@ -108,10 +108,11 @@ export default function QlpSwap(props) {
   const qlpManagerAddress = getContract(chainId, "QlpManager");
   const rewardRouterAddress = getContract(chainId, "RewardRouter");
   const tokensForBalanceAndSupplyQuery = [stakedQlpTrackerAddress, usdqAddress];
-  const dividendsAddress = getContract(chainId, "Farming");
+  const farmingAddress = getContract(chainId, "Farming");
   const ethAddress = getTokenBySymbol(chainId, "WETH");
   const quickAddress = getContract(chainId, "QUICK");
   const maticAddress = getTokenBySymbol(chainId, "MATIC");
+  const tokenAddresses = tokens.map((token) => token.address);
   const { data: tokenBalances } = useSWR(
     [`QlpSwap:getTokenBalances:${active}`, chainId, readerAddress, "getTokenBalances", account || PLACEHOLDER_ACCOUNT],
     {
@@ -123,7 +124,6 @@ export default function QlpSwap(props) {
   const ethTokenInfo = infoTokens[ethAddress.address];
   const maticTokenInfo = infoTokens[maticAddress.address];
   const quickPrice = useQuickUsdPrice();
-  const tokenAddresses = tokens.map((token) => token.address);
 
   const { data: balancesAndSupplies } = useSWR(
     [
@@ -171,14 +171,13 @@ export default function QlpSwap(props) {
     }
   );
 
-  const { data: qlpTotalSupply } = useSWR(active && [`QlpTotalSupply:${active}`, chainId, qlpAddress, "totalSupply"], {
+  const { data: qlpSupply = bigNumberify(0) } = useSWR(active && [`QlpTotalSupply:${active}`, chainId, qlpAddress, "totalSupply"], {
     fetcher: fetcher(library, QLPAbi, []),
   });
 
   const redemptionTime = lastPurchaseTime ? lastPurchaseTime.add(QLP_COOLDOWN_DURATION) : undefined;
   const inCooldownWindow = redemptionTime && parseInt(Date.now() / 1000) < redemptionTime;
 
-  const qlpSupply = balancesAndSupplies ? balancesAndSupplies[1] : bigNumberify(0);
   const usdqSupply = balancesAndSupplies ? balancesAndSupplies[3] : bigNumberify(0);
   let aum;
   if (aums && aums.length > 0) {
@@ -190,15 +189,15 @@ export default function QlpSwap(props) {
       : expandDecimals(1, USD_DECIMALS);
 
   const qlpMinPrice =
-    aums && aums.length > 0 && qlpTotalSupply.gt(0)
-      ? aums[1].mul(expandDecimals(1, QLP_DECIMALS)).div(qlpTotalSupply)
+    aums && aums.length > 0 && qlpSupply && qlpSupply.gt(0)
+      ? aums[1].mul(expandDecimals(1, QLP_DECIMALS)).div(qlpSupply)
       : expandDecimals(1, USD_DECIMALS);
 
   let qlpBalanceUsd;
   if (qlpBalance) {
     qlpBalanceUsd = qlpBalance.mul(qlpPrice).div(expandDecimals(1, QLP_DECIMALS));
   }
-  const qlpSupplyUsd = qlpSupply.mul(qlpPrice).div(expandDecimals(1, QLP_DECIMALS));
+  const qlpSupplyUsd = qlpSupply ? qlpSupply.mul(qlpPrice).div(expandDecimals(1, QLP_DECIMALS)): bigNumberify(0);
 
   const reservedAmount = bigNumberify(0);
 
@@ -223,26 +222,26 @@ export default function QlpSwap(props) {
     );
   }
 
-  const { data: ethFarmingInfo } = useSWR([`ethFarmingInfo:${active}`, chainId, dividendsAddress, "dividendsInfo"], {
+  const { data: ethFarmingInfo } = useSWR([`ethFarmingInfo:${active}`, chainId, farmingAddress, "farmingInfo"], {
     fetcher: fetcher(library, FarmingAbi, [ethAddress.address]),
   });
 
   const { data: maticFarmingInfo } = useSWR(
-    [`maticFarmingInfo:${active}`, chainId, dividendsAddress, "dividendsInfo"],
+    [`maticFarmingInfo:${active}`, chainId, farmingAddress, "farmingInfo"],
     {
       fetcher: fetcher(library, FarmingAbi, [maticAddress.address]),
     }
   );
 
   const { data: quickFarmingInfo } = useSWR(
-    [`quickFarmingInfo:${active}`, chainId, dividendsAddress, "dividendsInfo"],
+    [`quickFarmingInfo:${active}`, chainId, farmingAddress, "farmingInfo"],
     {
       fetcher: fetcher(library, FarmingAbi, [quickAddress]),
     }
   );
 
   const { data: totalAllocation } = useSWR(
-    [`totalAllocation:${active}`, chainId, dividendsAddress, "totalAllocation"],
+    [`totalAllocation:${active}`, chainId, farmingAddress, "totalAllocation"],
     {
       fetcher: fetcher(library, FarmingAbi, []),
     }
