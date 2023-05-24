@@ -103,13 +103,11 @@ export default function QlpSwap(props) {
 
   const vaultAddress = getContract(chainId, "Vault");
   const nativeTokenAddress = getContract(chainId, "NATIVE_TOKEN");
-  const stakedQlpTrackerAddress = getContract(chainId, "StakedQlpTracker");
 
   const qlpAddress = getContract(chainId, "QLP");
   const usdqAddress = getContract(chainId, "USDQ");
   const qlpManagerAddress = getContract(chainId, "QlpManager");
   const rewardRouterAddress = getContract(chainId, "RewardRouter");
-  const tokensForBalanceAndSupplyQuery = [stakedQlpTrackerAddress, usdqAddress];
   const farmingAddress = getContract(chainId, "Farming");
   const ethAddress = getTokenBySymbol(chainId, "WETH");
   const quickAddress = getContract(chainId, "QUICK");
@@ -126,19 +124,6 @@ export default function QlpSwap(props) {
   const ethTokenInfo = infoTokens[ethAddress.address];
   const maticTokenInfo = infoTokens[maticAddress.address];
   const quickPrice = useQuickUsdPrice();
-
-  const { data: balancesAndSupplies } = useSWR(
-    [
-      `QlpSwap:getTokenBalancesWithSupplies:${active}`,
-      chainId,
-      readerAddress,
-      "getTokenBalancesWithSupplies",
-      account || PLACEHOLDER_ACCOUNT,
-    ],
-    {
-      fetcher: fetcher(library, Reader, [tokensForBalanceAndSupplyQuery]),
-    }
-  );
 
   const { data: aums } = useSWR([`QlpSwap:getAums:${active}`, chainId, qlpManagerAddress, "getAums"], {
     fetcher: fetcher(library, QlpManager),
@@ -177,10 +162,13 @@ export default function QlpSwap(props) {
     fetcher: fetcher(library, QLPAbi, []),
   });
 
+  const { data: usdqSupply = bigNumberify(0) } = useSWR(active && [`UsdqTotalSupply:${active}`, chainId, usdqAddress, "totalSupply"], {
+    fetcher: fetcher(library, QLPAbi, []),
+  });
+
   const redemptionTime = lastPurchaseTime ? lastPurchaseTime.add(QLP_COOLDOWN_DURATION) : undefined;
   const inCooldownWindow = redemptionTime && parseInt(Date.now() / 1000) < redemptionTime;
 
-  const usdqSupply = balancesAndSupplies ? balancesAndSupplies[3] : bigNumberify(0);
   let aum;
   if (aums && aums.length > 0) {
     aum = isBuying ? aums[0] : aums[1];

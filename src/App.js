@@ -51,8 +51,6 @@ import Actions from "./views/Actions/Actions";
 import Referrals from "./views/Referrals/Referrals";
 import BuyQlp from "./views/BuyQlp/BuyQlp";
 import SellQlp from "./views/SellQlp/SellQlp";
-import BeginAccountTransfer from "./views/BeginAccountTransfer/BeginAccountTransfer";
-import CompleteAccountTransfer from "./views/CompleteAccountTransfer/CompleteAccountTransfer";
 import Farming from './views/Farming/Farming'
 
 import cx from "classnames";
@@ -728,12 +726,6 @@ function FullApp() {
             </Route> */}
             <Route exact path="/actions">
               <Actions />
-            </Route>
-            <Route exact path="/begin_account_transfer">
-              <BeginAccountTransfer setPendingTxns={setPendingTxns} />
-            </Route>
-            <Route exact path="/complete_account_transfer/:sender/:receiver">
-              <CompleteAccountTransfer setPendingTxns={setPendingTxns} />
             </Route>
             <Route exact path="/referral-terms">
               <ReferralTerms />

@@ -177,7 +177,7 @@ export const platformTokens = {
       name: "Quickperp LP",
       symbol: "QLP",
       decimals: 18,
-      address: getContract(POLYGON_ZKEVM, "StakedQlpTracker"),
+      address: getContract(POLYGON_ZKEVM, "QLP"),
       imageUrl: "https://res.cloudinary.com/quickperp/image/upload/v1662984581/website-assets/qlp-token.png",
     },
   },
@@ -2115,41 +2115,6 @@ export function isMobileDevice(navigator) {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-export function setTokenUsingIndexPrices(token, indexPrices, nativeTokenAddress) {
-  if (!indexPrices) {
-    return;
-  }
-
-  const tokenAddress = token.isNative ? nativeTokenAddress : token.address;
-
-  const indexPrice = indexPrices[tokenAddress];
-  if (!indexPrice) {
-    return;
-  }
-
-  const indexPriceBn = bigNumberify(indexPrice);
-  if (indexPriceBn.eq(0)) {
-    return;
-  }
-
-  const spread = token.maxPrice.sub(token.minPrice);
-  const spreadBps = spread.mul(BASIS_POINTS_DIVISOR).div(token.maxPrice.add(token.minPrice).div(2));
-
-  if (spreadBps.gt(MAX_PRICE_DEVIATION_BASIS_POINTS - 50)) {
-    // only set one of the values as there will be a spread between the index price and the Chainlink price
-    if (indexPriceBn.gt(token.minPrimaryPrice)) {
-      token.maxPrice = indexPriceBn;
-    } else {
-      token.minPrice = indexPriceBn;
-    }
-    return;
-  }
-
-  const halfSpreadBps = spreadBps.div(2).toNumber();
-  token.maxPrice = indexPriceBn.mul(BASIS_POINTS_DIVISOR + halfSpreadBps).div(BASIS_POINTS_DIVISOR);
-  token.minPrice = indexPriceBn.mul(BASIS_POINTS_DIVISOR - halfSpreadBps).div(BASIS_POINTS_DIVISOR);
-}
-
 export function getInfoTokens(
   tokens,
   tokenBalances,
@@ -2198,7 +2163,6 @@ export function getInfoTokens(
       token.maxPrimaryPrice = vaultTokenInfo[i * vaultPropsLength + 13];
       token.minPrimaryPrice = vaultTokenInfo[i * vaultPropsLength + 14];
 
-      // save minPrice and maxPrice as setTokenUsingIndexPrices may override it
       token.contractMinPrice = token.minPrice;
       token.contractMaxPrice = token.maxPrice;
 
@@ -2240,7 +2204,6 @@ export function getInfoTokens(
       token.managedUsd = token.availableUsd.add(token.guaranteedUsd);
       token.managedAmount = token.managedUsd.mul(expandDecimals(1, token.decimals)).div(token.minPrice);
 
-      //setTokenUsingIndexPrices(token, indexPrices, nativeTokenAddress);
     }
 
     if (fundingRateInfo) {
@@ -2296,84 +2259,6 @@ export function getBalanceAndSupplyData(balances) {
   }
 
   return { balanceData, supplyData };
-}
-
-export function getDepositBalanceData(depositBalances) {
-  if (!depositBalances || depositBalances.length === 0) {
-    return;
-  }
-
-  const keys = ["qlpInStakedQlp"];
-  const data = {};
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    data[key] = depositBalances[i];
-  }
-
-  return data;
-}
-
-export function getStakingData(stakingInfo) {
-  if (!stakingInfo || stakingInfo.length === 0) {
-    return;
-  }
-
-  const keys = ["stakedQlpTracker", "feeQlpTracker"];
-  const data = {};
-  const propsLength = 5;
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    data[key] = {
-      claimable: stakingInfo[i * propsLength],
-      tokensPerInterval: stakingInfo[i * propsLength + 1],
-      averageStakedAmounts: stakingInfo[i * propsLength + 2],
-      cumulativeRewards: stakingInfo[i * propsLength + 3],
-      totalSupply: stakingInfo[i * propsLength + 4],
-    };
-  }
-
-  return data;
-}
-
-export function getProcessedData(balanceData, supplyData, depositBalanceData, stakingData, aum, nativeTokenPrice) {
-  if (!balanceData || !supplyData || !depositBalanceData || !stakingData || !aum || !nativeTokenPrice) {
-    return {};
-  }
-
-  const data = {};
-
-  data.boostBasisPoints = bigNumberify(0);
-
-  data.qlpSupply = supplyData.qlp;
-  data.qlpPrice =
-    data.qlpSupply && data.qlpSupply.gt(0)
-      ? aum.mul(expandDecimals(1, QLP_DECIMALS)).div(data.qlpSupply)
-      : bigNumberify(0);
-
-  data.qlpSupplyUsd = supplyData.qlp.mul(data.qlpPrice).div(expandDecimals(1, 18));
-
-  data.qlpBalance = depositBalanceData.qlpInStakedQlp;
-  data.qlpBalanceUsd = depositBalanceData.qlpInStakedQlp.mul(data.qlpPrice).div(expandDecimals(1, QLP_DECIMALS));
-
-  data.feeQlpTrackerRewards = stakingData.feeQlpTracker.claimable;
-  data.feeQlpTrackerRewardsUsd = stakingData.feeQlpTracker.claimable.mul(nativeTokenPrice).div(expandDecimals(1, 18));
-
-  data.feeQlpTrackerAnnualRewardsUsd = stakingData.feeQlpTracker.tokensPerInterval
-    .mul(SECONDS_PER_YEAR)
-    .mul(nativeTokenPrice)
-    .div(expandDecimals(1, 18));
-
-  data.qlpAprForNativeToken =
-    data.qlpSupplyUsd && data.qlpSupplyUsd.gt(0)
-      ? data.feeQlpTrackerAnnualRewardsUsd.mul(BASIS_POINTS_DIVISOR).div(data.qlpSupplyUsd)
-      : bigNumberify(0);
-  data.qlpAprTotal = data.qlpAprForNativeToken;
-
-  data.totalQlpRewardsUsd = data.feeQlpTrackerRewardsUsd;
-
-  return data;
 }
 
 export async function addTokenToMetamask(token) {
@@ -2435,34 +2320,12 @@ export function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-export function isDevelopment() {
-  return (
-    !window.location.host?.includes("perps.quickswap.exchange") &&
-    !window.location.host?.includes("perps.quickswap.exchange")
-  );
-}
-
-export function isLocal() {
-  return window.location.host?.includes("localhost");
-}
-
 export function getHomeUrl() {
   return "https://perps.quickswap.exchange";
 }
 
 export function getRootShareApiUrl() {
   return "https://perps-share.quickswap.exchange";
-}
-
-export function importImage(name) {
-  let tokenImage = null;
-  try {
-    tokenImage = require("./img/" + name);
-  } catch (error) {
-    tokenImage = require("./img/ic_matic_40.svg");
-    console.error(error);
-  }
-  return tokenImage && tokenImage.default;
 }
 
 export function getTwitterIntentURL(text, url = "", hashtag = "") {
@@ -2480,10 +2343,6 @@ export function getTwitterIntentURL(text, url = "", hashtag = "") {
     }
   }
   return finalURL;
-}
-
-export function isValidTimestamp(timestamp) {
-  return new Date(timestamp).getTime() > 0;
 }
 
 export function getPositionForOrder(account, order, positionsMap) {
@@ -2516,13 +2375,4 @@ export function getOrderError(account, order, positionsMap, position) {
   }
 }
 
-export function arrayURLFetcher(...urlArr) {
-  const fetcher = (url) => fetch(url).then((res) => res.json());
-  return Promise.all(urlArr.map(fetcher));
-}
 
-export function shouldShowRedirectModal(timestamp) {
-  const thirtyDays = 1000 * 60 * 60 * 24 * 30;
-  const expiryTime = timestamp + thirtyDays;
-  return !isValidTimestamp(timestamp) || Date.now() > expiryTime;
-}

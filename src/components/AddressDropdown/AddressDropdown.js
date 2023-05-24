@@ -56,12 +56,6 @@ function AddressDropdown({ account, accountUrl, disconnectAccountAndCloseSetting
             </div>
           </Menu.Item>
           <Menu.Item>
-            <Link to="/begin_account_transfer" className="menu-item">
-              <img src={transferAccount} alt="Transfer your account" />
-              <p>Transfer Account</p>
-            </Link>
-          </Menu.Item>
-          <Menu.Item>
             <div className="menu-item" onClick={disconnectAccountAndCloseSettings}>
               <img src={disconnect} alt="Disconnect the wallet" />
               <p className="no-border">Disconnect</p>
