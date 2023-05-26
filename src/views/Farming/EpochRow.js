@@ -5,7 +5,7 @@ import { bigNumberify, expandDecimals, formatAmount, useChainId } from "../../He
 import { farmingClaim } from "../../Api";
 import { useWeb3React } from "@web3-react/core";
 
-export default function EpochRow({ name, symbol,tokenAddress,displayDecimals, amount, isClaim, price }) {
+export default function EpochRow({ name, symbol,tokenAddress,displayDecimals, amount,tokenDecimals=18, isClaim, price }) {
   const { active, account, library } = useWeb3React();
   const { chainId } = useChainId();
   const [withdrawETH, setWithdrawETH] = useState(false);
@@ -30,8 +30,8 @@ export default function EpochRow({ name, symbol,tokenAddress,displayDecimals, am
         <div className="epoch-content">
           <h1>{name}</h1>
           <p>
-            <span style={{ fontSize: 17 }}>{formatAmount(amount, 18, displayDecimals || 2, true)}</span>
-            <span style={{ color: "#696C80" }}>(${formatAmount(amountInUsd, 18, 2, true)})</span>
+            <span style={{ fontSize: 17 }}>{formatAmount(amount, tokenDecimals, displayDecimals || 2, true)}</span>
+            <span style={{ color: "#696C80" }}>(${formatAmount(amountInUsd, tokenDecimals, displayDecimals || 2, true)})</span>
           </p>
           {isClaim && name === "ETH" && (
             <div style={{ display: "flex", alignItems: "center", marginTop: 5 }}>
