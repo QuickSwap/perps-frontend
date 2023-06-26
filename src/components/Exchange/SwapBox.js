@@ -63,6 +63,7 @@ import {
   isHashZero,
   SWAP_PERPS,
   SWAP_QUICK_V3,
+  swapTypes,
 } from "../../Helpers";
 import { getConstant } from "../../Constants";
 import * as Api from "../../Api";
@@ -1834,11 +1835,25 @@ export default function SwapBox(props) {
       <div className="Exchange-swap-box-inner App-box-highlight">
         <div>
           <Tab
-            options={SWAP_OPTIONS}
+            options={
+              SWAP_OPTIONS.map((option) => {
+                return option === SWAP ? 
+                  { 
+                    html: <div className="Exchange-swap-tab-wrapper">
+                            <p>{option}</p>
+                            <small>({swapTypes[swapType]})</small>
+                          </div>,
+                    value: option
+                  } : option
+              })
+            }
             option={swapOption}
             onChange={onSwapOptionChange}
             className="Exchange-swap-option-tabs tradePage"
           />
+          <div className='Exchange-swap-types-wrapper'>
+            <SwapDropdown swapType={swapType} setSwapType={setSwapType} />
+          </div>
           <div className='Exchange-swap-menu'>
             {flagOrdersEnabled && (
               (!isSwap || swapType === SWAP_PERPS) ?
@@ -1850,23 +1865,11 @@ export default function SwapBox(props) {
                   option={orderOption}
                   onChange={onOrderOptionChange}
                 />
-              : <div style={{height: 24, margin: '1.5rem 0'}} />
+              : <div style={{margin: '10px 0'}} />
             )}
-            {isSwap &&
-              <SwapDropdown swapType={swapType} setSwapType={setSwapType} />
-            }
           </div>
         </div>
-        {isSwap && swapType !== SWAP_PERPS && (
-          <iframe
-            src={`https://widget.quickswap.exchange/#/?swapIndex=${swapType === SWAP_QUICK_V3 ? 2 : 0}&currency0=ETH`}
-            title='Swap Widget'
-            width='100%'
-            height={300}
-            style={{marginBottom: 20}}
-          />
-        )}
-        {showFromAndToSection && (!isSwap || swapType === SWAP_PERPS) && (
+        {showFromAndToSection && (
           <React.Fragment>
             <div className="Exchange-swap-section">
               <div className="Exchange-swap-section-top">

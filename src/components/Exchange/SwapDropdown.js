@@ -3,14 +3,13 @@ import { FiChevronDown } from "react-icons/fi";
 import "./SwapDropdown.css";
 import { swapTypes } from "../../Helpers";
 
-function SwapDropdown({swapType, setSwapType}) {
+function SwapDropdown({setSwapType}) {
   return (
     <Menu>
       <div className="swap-menu-wrapper">
         <Menu.Button as="div">
           <div className="swap-menu-main">
-            <p>{swapTypes[swapType]}</p>
-            <FiChevronDown size={20} />
+            <FiChevronDown size={20} color="#448AFF" />
           </div>
         </Menu.Button>
         <Menu.Items as="div" className="swap-menu-items">

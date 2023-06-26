@@ -1178,3 +1178,25 @@ table.Exchange-list-small td {
   justify-content: space-between;
   align-items: center;
 }
+
+.Exchange-swap-tab-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.Exchange-swap-tab-wrapper p {
+  margin-bottom: 0;
+  line-height: 22px;
+}
+
+.Exchange-swap-tab-wrapper small {
+  font-size: 12px;
+  line-height: 14px;
+}
+
+.Exchange-swap-types-wrapper {
+  position: absolute;
+  right: 20px;
+  top: 28px;
+}

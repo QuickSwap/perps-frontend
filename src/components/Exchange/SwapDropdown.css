@@ -1,6 +1,5 @@
 .swap-menu-wrapper {
   position: relative;
-  min-width: 120px;
 }
 
 .swap-menu-main {
@@ -25,7 +24,8 @@
   font-size: 14px;
   overflow: hidden;
   font-weight: normal !important;
-  width: 100%;
+  min-width: 120px;
+  right: 0;
 }
 
 .dropdown-arrow {
