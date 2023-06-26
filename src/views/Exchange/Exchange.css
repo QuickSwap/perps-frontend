@@ -1172,3 +1172,9 @@ table.Exchange-list-small td {
 .nav-button {
   font-family: "Inter", sans-serif;
 }
+
+.Exchange-swap-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

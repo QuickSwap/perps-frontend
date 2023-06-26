@@ -27,6 +27,7 @@ import {
   useChainId,
   useAccountOrders,
   getPageTitle,
+  SWAP_QUICK_BEST_TRADE,
 } from "../../Helpers";
 import { getConstant } from "../../Constants";
 import { approvePlugin, useInfoTokens, useMinExecutionFee, cancelMultipleOrders } from "../../Api";
@@ -371,6 +372,7 @@ export const Exchange = forwardRef((props, ref) => {
 
   const [pendingPositions, setPendingPositions] = useState({});
   const [updatedPositions, setUpdatedPositions] = useState({});
+  const [swapType, setSwapType] = useState(SWAP_QUICK_BEST_TRADE);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -983,6 +985,8 @@ export const Exchange = forwardRef((props, ref) => {
             minExecutionFeeUSD={minExecutionFeeUSD}
             minExecutionFeeErrorMessage={minExecutionFeeErrorMessage}
             showModal={showModal}
+            swapType={swapType}
+            setSwapType={setSwapType}
           />
           <div className="Exchange-wallet-tokens">
             <div className="Exchange-wallet-tokens-content">

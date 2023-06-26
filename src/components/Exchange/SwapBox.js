@@ -61,6 +61,8 @@ import {
   adjustForDecimals,
   REFERRAL_CODE_KEY,
   isHashZero,
+  SWAP_PERPS,
+  SWAP_QUICK_V3,
 } from "../../Helpers";
 import { getConstant } from "../../Constants";
 import * as Api from "../../Api";
@@ -78,6 +80,7 @@ import PositionRouter from "../../abis/PositionRouter.json";
 import Router from "../../abis/Router.json";
 import Token from "../../abis/Token.json";
 import WETH from "../../abis/WETH.json";
+import SwapDropdown from "./SwapDropdown";
 
 const { AddressZero } = ethers.constants;
 
@@ -159,8 +162,10 @@ export default function SwapBox(props) {
     minExecutionFeeUSD,
     minExecutionFeeErrorMessage,
     showModal,
+    swapType,
+    setSwapType
   } = props;
-
+  
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
   const [anchorOnFromAmount, setAnchorOnFromAmount] = useState(true);
@@ -1834,18 +1839,34 @@ export default function SwapBox(props) {
             onChange={onSwapOptionChange}
             className="Exchange-swap-option-tabs tradePage"
           />
-          {flagOrdersEnabled && (
-            <Tab
-              options={orderOptions}
-              optionLabels={orderOptionLabels}
-              className="Exchange-swap-order-type-tabs"
-              type="inline"
-              option={orderOption}
-              onChange={onOrderOptionChange}
-            />
-          )}
+          <div className='Exchange-swap-menu'>
+            {flagOrdersEnabled && (
+              (!isSwap || swapType === SWAP_PERPS) ?
+                <Tab
+                  options={orderOptions}
+                  optionLabels={orderOptionLabels}
+                  className="Exchange-swap-order-type-tabs"
+                  type="inline"
+                  option={orderOption}
+                  onChange={onOrderOptionChange}
+                />
+              : <div style={{height: 24, margin: '1.5rem 0'}} />
+            )}
+            {isSwap &&
+              <SwapDropdown swapType={swapType} setSwapType={setSwapType} />
+            }
+          </div>
         </div>
-        {showFromAndToSection && (
+        {isSwap && swapType !== SWAP_PERPS && (
+          <iframe
+            src={`https://widget.quickswap.exchange/#/?swapIndex=${swapType === SWAP_QUICK_V3 ? 2 : 0}&currency0=ETH`}
+            title='Swap Widget'
+            width='100%'
+            height={300}
+            style={{marginBottom: 20}}
+          />
+        )}
+        {showFromAndToSection && (!isSwap || swapType === SWAP_PERPS) && (
           <React.Fragment>
             <div className="Exchange-swap-section">
               <div className="Exchange-swap-section-top">
@@ -2018,7 +2039,7 @@ export default function SwapBox(props) {
             </div>
           </div>
         )}
-        {isSwap && (
+        {isSwap && swapType === SWAP_PERPS && (
           <div className="Exchange-swap-box-info">
             <ExchangeInfoRow label="Fees">
               <div>

@@ -21,6 +21,11 @@ import { getWhitelistedTokens, isValidToken } from "./data/Tokens";
 
 const { AddressZero } = ethers.constants;
 
+export const swapTypes = ['Best Trade', 'V3', 'Perps'];
+export const SWAP_QUICK_BEST_TRADE = 0;
+export const SWAP_QUICK_V3 = 1;
+export const SWAP_PERPS = 2;
+
 export const UI_VERSION = "1.3";
 
 // use a random placeholder account instead of the zero address as the zero address might have tokens
