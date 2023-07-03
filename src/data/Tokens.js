@@ -125,6 +125,33 @@ export function getNativeToken(chainId) {
   return NATIVE_TOKENS_MAP[chainId];
 }
 
+export async function getQuickSwapTokens(chainId) {
+  const nativeToken = {
+    name: "Ethereum",
+    symbol: "ETH",
+    decimals: 18,
+    address: ethers.constants.AddressZero,
+    coingeckoUrl: "https://www.coingecko.com/en/coins/ethereum",
+    isNative: true,
+    isShortable: true,
+    displayDecimals:2
+  };
+  try {
+    const tokensRes = await fetch('https://unpkg.com/quickswap-default-token-list@latest/build/quickswap-default.tokenlist.json');
+    const tokensData = await tokensRes.json();
+    const tokens = tokensData['tokens']
+      .filter(token => token.chainId === Number(chainId))
+      .map(token => {
+        const isNative = token.address.toLowerCase() === ethers.constants.AddressZero ? true : false;
+        const isWrapped = token.address.toLowerCase() === "0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9".toLowerCase() ? true : false;
+        return {...token, address: token.address.toLowerCase(), isNative, isWrapped}
+      })
+    return [nativeToken].concat(tokens);
+  } catch {
+    return [];
+  }
+}
+
 export function getTokens(chainId) {
   return TOKENS[chainId];
 }
@@ -136,7 +163,10 @@ export function isValidToken(chainId, address) {
   return address in TOKENS_MAP[chainId];
 }
 
-export function getToken(chainId, address) {
+export function getToken(chainId, address, qsTokens, isQSSwap) {
+  if (isQSSwap) {
+    return qsTokens.find(token => token.address.toLowerCase() === address.toLowerCase())
+  }
   if (!TOKENS_MAP[chainId]) {
     throw new Error(`Incorrect chainId ${chainId}`);
   }

@@ -64,6 +64,7 @@ import {
   SWAP_PERPS,
   SWAP_QUICK_V3,
   swapTypes,
+  SWAP_QUICK_BEST_TRADE,
 } from "../../Helpers";
 import { getConstant } from "../../Constants";
 import * as Api from "../../Api";
@@ -164,7 +165,8 @@ export default function SwapBox(props) {
     minExecutionFeeErrorMessage,
     showModal,
     swapType,
-    setSwapType
+    setSwapType,
+    quickswapTokens
   } = props;
   
   const [fromValue, setFromValue] = useState("");
@@ -253,14 +255,15 @@ export default function SwapBox(props) {
   const existingPosition = positionKey ? positionsMap[positionKey] : undefined;
   const hasExistingPosition = existingPosition && existingPosition.size && existingPosition.size.gt(0);
 
+  const isQSSwap = swapType === SWAP_QUICK_V3 || swapType === SWAP_QUICK_BEST_TRADE;
   const whitelistedTokens = getWhitelistedTokens(chainId);
   const tokens = getTokens(chainId);
-  const fromTokens = tokens;
+  const fromTokens = isQSSwap ? quickswapTokens : tokens;
   const stableTokens = tokens.filter((token) => token.isStable);
   const indexTokens = whitelistedTokens.filter((token) => !token.isStable && !token.isWrapped);
   const shortableTokens = indexTokens.filter((token) => token.isShortable);
 
-  let toTokens = tokens;
+  let toTokens = isQSSwap ? quickswapTokens : tokens;
   if (isLong) {
     toTokens = indexTokens;
   }
@@ -309,8 +312,8 @@ export default function SwapBox(props) {
     }
   );
 
-  const fromToken = getToken(chainId, fromTokenAddress);
-  const toToken = getToken(chainId, toTokenAddress);
+  const fromToken = getToken(chainId, fromTokenAddress, quickswapTokens, isQSSwap);
+  const toToken = getToken(chainId, toTokenAddress, quickswapTokens, isQSSwap);
   const shortCollateralToken = getTokenInfo(infoTokens, shortCollateralAddress);
 
   const fromTokenInfo = getTokenInfo(infoTokens, fromTokenAddress);
@@ -352,7 +355,7 @@ export default function SwapBox(props) {
   const fromAmount = parseValue(fromValue, fromToken && fromToken.decimals);
   const toAmount = parseValue(toValue, toToken && toToken.decimals);
 
-  const isPotentialWrap = (fromToken.isNative && toToken.isWrapped) || (fromToken.isWrapped && toToken.isNative);
+  const isPotentialWrap = (fromToken && toToken && fromToken.isNative && toToken.isWrapped) || (fromToken && toToken && fromToken.isWrapped && toToken.isNative);
   const isWrapOrUnwrap = isSwap && isPotentialWrap;
   const needApproval =
     fromTokenAddress !== AddressZero &&
@@ -378,9 +381,9 @@ export default function SwapBox(props) {
   }, [toTokenInfo, fromTokenInfo]);
 
   const maxToTokenOut = useMemo(() => {
-    const value = toTokenInfo.availableAmount?.gt(toTokenInfo.poolAmount?.sub(toTokenInfo.bufferAmount))
-      ? toTokenInfo.poolAmount?.sub(toTokenInfo.bufferAmount)
-      : toTokenInfo.availableAmount;
+    const value = toTokenInfo?.availableAmount?.gt(toTokenInfo?.poolAmount?.sub(toTokenInfo?.bufferAmount))
+      ? toTokenInfo?.poolAmount?.sub(toTokenInfo?.bufferAmount)
+      : toTokenInfo?.availableAmount;
 
     if (!value) {
       return bigNumberify(0);
@@ -394,6 +397,9 @@ export default function SwapBox(props) {
   }, [maxToTokenOut, toTokenAddress, infoTokens]);
 
   const maxFromTokenInUSD = useMemo(() => {
+    if (!fromTokenInfo) {
+      return bigNumberify(0);
+    }
     const value = fromTokenInfo.maxUsdqAmount
       ?.sub(fromTokenInfo.usdqAmount)
       .mul(expandDecimals(1, USD_DECIMALS))
@@ -407,7 +413,7 @@ export default function SwapBox(props) {
   }, [fromTokenInfo]);
 
   const maxFromTokenIn = useMemo(() => {
-    if (!fromTokenInfo.maxPrice) {
+    if (!fromTokenInfo || !fromTokenInfo.maxPrice) {
       return bigNumberify(0);
     }
     return maxFromTokenInUSD?.mul(expandDecimals(1, fromTokenInfo.decimals)).div(fromTokenInfo.maxPrice).toString();
@@ -442,7 +448,7 @@ export default function SwapBox(props) {
       isWaitingForApproval
     ) {
       setIsWaitingForApproval(false);
-      helperToast.success(<div>{fromToken.symbol} approved!</div>);
+      helperToast.success(<div>{fromToken?.symbol} approved!</div>);
     }
   }, [
     fromTokenAddress,
@@ -450,13 +456,13 @@ export default function SwapBox(props) {
     needApproval,
     prevNeedApproval,
     setIsWaitingForApproval,
-    fromToken.symbol,
+    fromToken?.symbol,
     isWaitingForApproval,
     fromToken,
   ]);
 
   useEffect(() => {
-    if (!toTokens.find((token) => token.address === toTokenAddress)) {
+    if (!toTokens.find((token) => token.address === toTokenAddress) && toTokens.length > 0) {
       setToTokenAddress(swapOption, toTokens[0].address);
     }
   }, [swapOption, toTokens, toTokenAddress, setToTokenAddress]);
@@ -1914,6 +1920,8 @@ export default function SwapBox(props) {
                     showMintingCap={false}
                     showTokenImgInDropdown={true}
                     showSymbolImage={true}
+                    quickswapTokens={quickswapTokens}
+                    isQSSwap={isQSSwap}
                   />
                 </div>
               </div>
@@ -1961,6 +1969,8 @@ export default function SwapBox(props) {
                     infoTokens={infoTokens}
                     showTokenImgInDropdown={true}
                     showSymbolImage={true}
+                    quickswapTokens={quickswapTokens}
+                    isQSSwap={isQSSwap}
                   />
                 </div>
               </div>

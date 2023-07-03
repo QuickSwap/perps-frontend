@@ -355,7 +355,7 @@ export function getServerUrl(chainId, path) {
 export function isTriggerRatioInverted(fromTokenInfo, toTokenInfo) {
   if (!toTokenInfo || !fromTokenInfo) return false;
   if (toTokenInfo.isStable || toTokenInfo.isUsdq) return true;
-  if (toTokenInfo.maxPrice) return toTokenInfo.maxPrice.lt(fromTokenInfo.maxPrice);
+  if (toTokenInfo.maxPrice && fromTokenInfo.maxPrice) return toTokenInfo.maxPrice.lt(fromTokenInfo.maxPrice);
   return false;
 }
 

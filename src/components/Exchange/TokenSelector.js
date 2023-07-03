@@ -17,7 +17,7 @@ import { getImageUrl } from "../../cloudinary/getImageUrl";
 export default function TokenSelector(props) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const tokenInfo = getToken(props.chainId, props.tokenAddress);
+  const tokenInfo = getToken(props.chainId, props.tokenAddress, props.quickswapTokens, props.isQSSwap);
   const {
     tokens,
     mintingCap,
@@ -53,10 +53,14 @@ export default function TokenSelector(props) {
   var tokenImage = null;
 
   try {
-    tokenImage = getImageUrl({
-      path: `coins/others/${tokenInfo.symbol.toLowerCase()}-original`,
-      format:"png"
-    })
+    if (tokenInfo.logoURI) {
+      tokenImage = tokenInfo.logoURI;
+    } else {
+      tokenImage = getImageUrl({
+        path: `coins/others/${tokenInfo.symbol.toLowerCase()}-original`,
+        format:"png"
+      })  
+    }
   } catch (error) {
     console.error(error);
   }
@@ -101,7 +105,7 @@ export default function TokenSelector(props) {
           {filteredTokens.map((token, tokenIndex) => {
             let tokenPopupImage;
             try {
-              tokenPopupImage = getImageUrl({
+              tokenPopupImage = token.logoURI ?? getImageUrl({
                 path: `coins/others/${token.symbol.toLowerCase()}-original`,
                 format:"png"
               });
