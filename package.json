@@ -18,6 +18,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "@uniswap/v3-sdk": "^3.9.0",
     "@web3-onboard/coinbase": "^2.2.4",
     "@web3-onboard/core": "^2.20.4",
     "@web3-onboard/gas": "^2.1.8",

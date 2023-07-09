@@ -466,12 +466,21 @@ export const Exchange = forwardRef((props, ref) => {
   const tokens = isQSSwap ? quickswapTokens : perpsTokens;
 
   const tokenAddresses = tokens.map((token) => token.address);
-  const { data: tokenBalances } = useSWR(active && [`${isQSSwap ? 'QuickswapBalances' : 'PerpsBalances'}${active}${tokenAddresses.length}`, chainId, readerAddress, "getTokenBalances", account], {
-    fetcher: fetcher(library, Reader, [tokenAddresses]),
-  });
+  const { data: tokenBalances } = useSWR(
+    active && [
+      `${isQSSwap ? "QuickswapBalances" : "PerpsBalances"}${active}${tokenAddresses.length}`,
+      chainId,
+      readerAddress,
+      "getTokenBalances",
+      account,
+    ],
+    {
+      fetcher: fetcher(library, Reader, [tokenAddresses]),
+    }
+  );
 
   useEffect(() => {
-    (async() => {
+    (async () => {
       const qsTokens = await getQuickSwapTokens(chainId);
       setQuickswapTokens(qsTokens);
     })();
@@ -491,8 +500,8 @@ export const Exchange = forwardRef((props, ref) => {
   const positionsDataIsLoading = active && !positionData && !positionDataError;
 
   const { data: fundingRateInfo } = useSWR([active, chainId, readerAddress, "getFundingRates"], {
-      dedupingInterval: 20000,
-      fetcher: fetcher(library, Reader, [vaultAddress, nativeTokenAddress, whitelistedTokenAddresses]),
+    dedupingInterval: 20000,
+    fetcher: fetcher(library, Reader, [vaultAddress, nativeTokenAddress, whitelistedTokenAddresses]),
   });
 
   const { data: totalTokenWeights } = useSWR(
@@ -525,7 +534,16 @@ export const Exchange = forwardRef((props, ref) => {
     }
   );
 
-  const { infoTokens } = useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo, undefined, quickswapTokens, isQSSwap);
+  const { infoTokens } = useInfoTokens(
+    library,
+    chainId,
+    active,
+    tokenBalances,
+    fundingRateInfo,
+    undefined,
+    quickswapTokens,
+    isQSSwap
+  );
   const { minExecutionFee, minExecutionFeeUSD, minExecutionFeeErrorMessage } = useMinExecutionFee(
     library,
     active,
@@ -671,7 +689,7 @@ export const Exchange = forwardRef((props, ref) => {
       } within the allowed slippage, you can adjust the allowed slippage in the settings on the top right of the page.`;
 
       pushErrorNotification(chainId, message, e);
-      
+
       showModal(<TradeFailed />);
 
       const key = getPositionKey(account, path[path.length - 1], indexToken, isLong);
@@ -705,7 +723,7 @@ export const Exchange = forwardRef((props, ref) => {
       } within the allowed slippage, you can adjust the allowed slippage in the settings on the top right of the page.`;
 
       pushErrorNotification(chainId, message, e);
-      
+
       showModal(<TradeFailed />);
 
       const key = getPositionKey(account, path[path.length - 1], indexToken, isLong);
@@ -811,10 +829,9 @@ export const Exchange = forwardRef((props, ref) => {
 
   useEffect(() => {
     if (!isQSSwap && !getToken(chainId, toTokenAddress)) {
-      setToTokenAddress(swapOption, perpsTokens[0].address)
+      setToTokenAddress(swapOption, perpsTokens[0].address);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isQSSwap, chainId, toTokenAddress])
+  }, [isQSSwap, chainId, toTokenAddress]);
 
   if (!isQSSwap && !getToken(chainId, toTokenAddress)) {
     return null;
@@ -849,13 +866,12 @@ export const Exchange = forwardRef((props, ref) => {
           />
           <div className="align-right Exchange-should-show-position-lines">
             {renderCancelOrderButton()}
-            <span style={{marginRight:"8px"}}>Chart Positions</span>
+            <span style={{ marginRight: "8px" }}>Chart Positions</span>
             <Checkbox
               isChecked={savedShouldShowPositionLines}
               setIsChecked={setSavedShouldShowPositionLines}
               className={cx("chart-positions", { active: savedShouldShowPositionLines })}
-            >
-            </Checkbox>
+            ></Checkbox>
           </div>
         </div>
         {listSection === "Positions" && (
@@ -950,7 +966,7 @@ export const Exchange = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="Exchange page-layout" style={{marginTop:12}}>
+    <div className="Exchange page-layout" style={{ marginTop: 12 }}>
       <div className="Exchange-content">
         <div className="Exchange-left">
           {renderChart()}
