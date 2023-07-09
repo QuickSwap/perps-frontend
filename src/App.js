@@ -3,16 +3,13 @@ import { SWRConfig } from "swr";
 import { ethers } from "ethers";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useSafeAppConnection, SafeAppConnector } from '@gnosis.pm/safe-apps-web3-react';
 
-import Logo from './assets/logos/QuickswapLogo@2x.png'
-import qlp24Icon from "./img/ic_qlp_24.svg";
+import Logo from "./assets/logos/QuickswapLogo@2x.png";
+import LogoMobile from "./assets/logos/QuickLogoMobile.png";
 import NotFound from "./404";
-import NewBadge from './assets/icons/new.svg'
-import { Web3ReactProvider, useWeb3React } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 
-import HeaderNav from './HeaderNav'
+import HeaderNav from "./HeaderNav";
 
 import { Switch, Route, NavLink, Redirect } from "react-router-dom";
 
@@ -25,26 +22,17 @@ import {
   SHOULD_SHOW_POSITION_LINES_KEY,
   clearWalletConnectData,
   helperToast,
-  useChainId,
   getAccountUrl,
-  getInjectedHandler,
-  useEagerConnect,
   useLocalStorageSerializeKey,
-  useInactiveListener,
   getExplorerUrl,
-  getWalletConnectHandler,
-  activateInjectedProvider,
-  hasMetaMaskWalletExtension,
-  hasCoinBaseWalletExtension,
-  isMobileDevice,
   clearWalletLinkData,
   SHOULD_EAGER_CONNECT_LOCALSTORAGE_KEY,
   CURRENT_PROVIDER_LOCALSTORAGE_KEY,
   REFERRAL_CODE_KEY,
   REFERRAL_CODE_QUERY_PARAMS,
   POLYGON_ZKEVM,
+  DEFAULT_CHAIN_ID
 } from "./Helpers";
-
 
 import Dashboard from "./views/Dashboard/Dashboard";
 import { Exchange } from "./views/Exchange/Exchange";
@@ -74,9 +62,6 @@ import "./AppOrder.css";
 import TradeLogo from "./assets/logos/TradeLogo";
 import connectWalletImg from "./img/ic_wallet_24.svg";
 
-import metamaskImg from "./img/ic_metamask_hover_16.svg";
-import coinbaseImg from "./img/coinbaseWallet.png";
-import walletConnectImg from "./img/walletConnect.png";
 import AddressDropdown from "./components/AddressDropdown/AddressDropdown";
 import { ConnectWalletButton } from "./components/Common/Button";
 import useEventToast from "./components/EventToast/useEventToast";
@@ -91,8 +76,12 @@ import Vault from "./abis/Vault.json";
 import PositionRouter from "./abis/PositionRouter.json";
 import ReferralTerms from "./views/ReferralTerms/ReferralTerms";
 import { ModalProvider } from "./components/Modal/ModalProvider";
-import { WebSocketProvider } from "./utils/websocket-provider";
-const safeMultisigConnector = new SafeAppConnector();
+//import { WebSocketProvider } from "./utils/websocket-provider";
+
+import { initWeb3Onboard } from "./web3OnboardService";
+import { Web3OnboardProvider, useConnectWallet } from "@web3-onboard/react";
+
+import useWeb3Onboard from "./hooks/useWeb3Onboard";
 
 if ("ethereum" in window) {
   window.ethereum.autoRefreshOnNetworkChange = false;
@@ -112,7 +101,8 @@ const Zoom = cssTransition({
   duration: 200,
 });
 
-const polygonWsProvider = new WebSocketProvider(process.env.REACT_APP_POLYGON_WS);
+//const polygonWsProvider = new WebSocketProvider(process.env.REACT_APP_POLYGON_WS);
+const polygonWsProvider = new ethers.providers.WebSocketProvider(process.env.REACT_APP_POLYGON_WS);
 
 function getWsProvider(active, chainId) {
   if (!active) {
@@ -122,6 +112,29 @@ function getWsProvider(active, chainId) {
   if (chainId === POLYGON_ZKEVM) {
     return polygonWsProvider;
   }
+}
+function WrongChainButton() {
+  const { setChain, wrongChain } = useWeb3Onboard();
+
+  const swithToPolygonZkEVM = () => {
+    setChain({ chainId: DEFAULT_CHAIN_ID });
+  };
+
+  return (
+    <>
+      {wrongChain && (
+        <>
+        <div className="App-header-user-link">
+          <div className="btn btn-red address-btn" onClick={() => swithToPolygonZkEVM()}>
+            Switch to Polygon zkEVM
+          </div>
+        </div>
+
+      
+        </>
+      )}
+    </>
+  );
 }
 
 function AppHeaderLinks({ small, openSettings, clickCloseIcon }) {
@@ -138,11 +151,7 @@ function AppHeaderLinks({ small, openSettings, clickCloseIcon }) {
             href="https://perps.quickswap.exchange"
             rel="noopener noreferrer"
           >
-            <img
-              style={{ width: 21, height: 21 }}
-              src={qlp24Icon}
-              alt="Logo"
-            />
+            <img style={{ width: 21, height: 21 }} src={LogoMobile} alt="Logo" />
           </a>
         </div>
       )}
@@ -159,27 +168,27 @@ function AppHeaderLinks({ small, openSettings, clickCloseIcon }) {
         </div>
       )} */}
       <div className="App-header-link-container">
-        <a href="https://quickswap.exchange/#/swap" target='_blank' rel="noreferrer">
-            Swap
+        <a href="https://quickswap.exchange/#/swap" target="_blank" rel="noreferrer">
+          Swap
         </a>
       </div>
       <div className="App-header-link-container">
-          <NavLink activeClassName="active" to="/trade" className='active'>
+        <NavLink activeClassName="active" to="/trade" className="active">
           Perps
-          </NavLink>
+        </NavLink>
       </div>
       <div className="App-header-link-container">
-        <a href="https://quickswap.exchange/#/pools" target='_blank' rel="noreferrer">
+        <a href="https://quickswap.exchange/#/pools" target="_blank" rel="noreferrer">
           Pool
         </a>
       </div>
       <div className="App-header-link-container">
-      <a href="https://quickswap.exchange/#/farm" target='_blank' rel="noreferrer">
+        <a href="https://quickswap.exchange/#/farm" target="_blank" rel="noreferrer">
           Farm
         </a>
       </div>
       <div className="App-header-link-container">
-      <a href="https://zksafe.quickswap.exchange/welcome" target='_blank' rel="noreferrer">
+        <a href="https://zksafe.quickswap.exchange/welcome" target="_blank" rel="noreferrer">
           Safe
         </a>
       </div>
@@ -206,8 +215,8 @@ function AppHeaderLinks({ small, openSettings, clickCloseIcon }) {
         </a>
       </div> */}
       <div className="App-header-link-container">
-      <a href="https://quickswap.exchange/#/analytics" target='_blank' rel="noreferrer">
-        Analytics
+        <a href="https://quickswap.exchange/#/analytics" target="_blank" rel="noreferrer">
+          Analytics
         </a>
       </div>
 
@@ -230,8 +239,9 @@ function AppHeaderUser({
   showNetworkSelectorModal,
   disconnectAccountAndCloseSettings,
 }) {
-  const { chainId } = useChainId();
-  const { active, account } = useWeb3React();
+  const { account, active, library, chainId } = useWeb3Onboard();
+
+  const [{ wallet }, connect, disconnect] = useConnectWallet();
 
   useEffect(() => {
     if (active) {
@@ -239,17 +249,25 @@ function AppHeaderUser({
     }
   }, [active, setWalletModalVisible]);
 
+  const accountUrl = getAccountUrl(chainId, account);
+
+  const handleConnectWallet = async () => {
+    try {
+      await connect();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   if (!active) {
     return (
       <div className="App-header-user">
-        <ConnectWalletButton onClick={() => setWalletModalVisible(true)} imgSrc={connectWalletImg}>
+        <ConnectWalletButton onClick={() => handleConnectWallet()} imgSrc={connectWalletImg}>
           {small ? "Connect" : "Connect Wallet"}
         </ConnectWalletButton>
       </div>
     );
   }
-
-  const accountUrl = getAccountUrl(chainId, account);
 
   return (
     <div className="App-header-user">
@@ -268,25 +286,13 @@ function AppHeaderUser({
 
 function FullApp() {
   const exchangeRef = useRef();
-  const { connector, library, deactivate, activate, active } = useWeb3React();
-  const { chainId } = useChainId();
+
+  const { account, active, library, chainId } = useWeb3Onboard();
+  const [{ wallet }, connect, disconnect] = useConnectWallet();
+
   useEventToast();
+
   const [activatingConnector, setActivatingConnector] = useState();
-  const triedToConnectToSafe = useSafeAppConnection(safeMultisigConnector);
-
-  useEffect(() => {
-    if (triedToConnectToSafe) {
-      // fallback to other providers
-    }
-  }, [triedToConnectToSafe]);
-
-  useEffect(() => {
-    if (activatingConnector && activatingConnector === connector) {
-      setActivatingConnector(undefined);
-    }
-  }, [activatingConnector, connector, chainId]);
-  const triedEager = useEagerConnect(setActivatingConnector);
-  useInactiveListener(!triedEager || !!activatingConnector);
 
   const query = useRouteQuery();
 
@@ -312,13 +318,14 @@ function FullApp() {
     }
   }, []);
 
-  const disconnectAccount = useCallback(() => {
+  const disconnectAccount = useCallback(async () => {
     // only works with WalletConnect
     clearWalletConnectData();
     // force clear localStorage connection for MM/CB Wallet (Brave legacy)
     clearWalletLinkData();
-    deactivate();
-  }, [deactivate]);
+
+    await disconnect(wallet);
+  }, [wallet]);
 
   const disconnectAccountAndCloseSettings = () => {
     disconnectAccount();
@@ -327,62 +334,11 @@ function FullApp() {
     setIsSettingsVisible(false);
   };
 
-  const connectInjectedWallet = getInjectedHandler(activate);
-  const activateWalletConnect = () => {
-    getWalletConnectHandler(activate, deactivate, setActivatingConnector)();
-  };
-
-  const userOnMobileDevice = "navigator" in window && isMobileDevice(window.navigator);
-
-  const activateMetaMask = () => {
-    if (!hasMetaMaskWalletExtension()) {
-      helperToast.error(
-        <div>
-          MetaMask not detected.
-          <br />
-          <br />
-          <a href="https://metamask.io" target="_blank" rel="noopener noreferrer" className="ahreftextcolorwallet">
-            Install MetaMask
-          </a>
-          {userOnMobileDevice ? ", and use Quickperp with its built-in browser" : " to start using Quickperp"}.
-        </div>
-      );
-      return false;
-    }
-    attemptActivateWallet("MetaMask");
-  };
-  const activateCoinBase = () => {
-    if (!hasCoinBaseWalletExtension()) {
-      helperToast.error(
-        <div>
-          Coinbase Wallet not detected.
-          <br />
-          <br />
-          <a
-            href="https://www.coinbase.com/wallet"
-            target="_blank"
-            className="ahreftextcolorwallet"
-            rel="noopener noreferrer"
-          >
-            Install Coinbase Wallet
-          </a>
-          {userOnMobileDevice ? ", and use Quickperp with its built-in browser" : " to start using Quickperp"}.
-        </div>
-      );
-      return false;
-    }
-    attemptActivateWallet("CoinBase");
-  };
-
-  const attemptActivateWallet = (providerName) => {
-    localStorage.setItem(SHOULD_EAGER_CONNECT_LOCALSTORAGE_KEY, true);
-    localStorage.setItem(CURRENT_PROVIDER_LOCALSTORAGE_KEY, providerName);
-    activateInjectedProvider(providerName);
-    connectInjectedWallet();
-  };
-
   const [walletModalVisible, setWalletModalVisible] = useState();
-  const connectWallet = () => setWalletModalVisible(true);
+
+  const connectWallet = async () => {
+    await connect();
+  };
 
   const [isDrawerVisible, setIsDrawerVisible] = useState(undefined);
   const [isNativeSelectorModalVisible, setisNativeSelectorModalVisible] = useState(false);
@@ -603,15 +559,15 @@ function FullApp() {
             <div className="App-header large">
               <div className="App-header-container-left">
                 <a className="App-header-link-main" href="https://perps.quickswap.exchange">
-                  <img
-                    style={{  height: "28px", flexBasis: "none" }}
-                    src={Logo}
-                    alt="Logo"
-                  />
+                  <img style={{ height: "28px", flexBasis: "none" }} src={Logo} alt="Logo" />
                 </a>
                 <AppHeaderLinks />
               </div>
               <div className="App-header-container-right">
+     
+
+                <WrongChainButton />
+
                 <AppHeaderUser
                   disconnectAccountAndCloseSettings={disconnectAccountAndCloseSettings}
                   openSettings={openSettings}
@@ -634,12 +590,7 @@ function FullApp() {
                     {isDrawerVisible && <FaTimes className="App-header-menu-icon" />}
                   </div>
                   <div className="App-header-link-main clickable" onClick={() => setIsDrawerVisible(!isDrawerVisible)}>
-                    <img
-                      width={24}
-                      height={24}
-                      src={qlp24Icon}
-                      alt="Trade Logo"
-                    />
+                    <img width={24} height={24} src={LogoMobile} alt="Trade Logo" />
                   </div>
                 </div>
                 <div className="App-header-container-right">
@@ -676,7 +627,7 @@ function FullApp() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <Switch>
             <Route exact path="/">
               <Redirect to="/trade" />
@@ -756,29 +707,7 @@ function FullApp() {
         pauseOnHover
       />
       <EventToastContainer />
-      <Modal
-        className="Connect-wallet-modal"
-        isVisible={walletModalVisible}
-        setIsVisible={setWalletModalVisible}
-        label="Connect Wallet"
-      >
-        <button className="Wallet-btn MetaMask-btn" onClick={activateMetaMask}>
-          <img src={metamaskImg} alt="MetaMask" />
-          <div>MetaMask</div>
-        </button>
-        <button className="Wallet-btn CoinbaseWallet-btn" onClick={activateCoinBase}>
-          <img src={coinbaseImg} alt="Coinbase Wallet" />
-          <div>Coinbase Wallet</div>
-        </button>
-        <button className="Wallet-btn WalletConnect-btn" onClick={activateWalletConnect}>
-          <img src={walletConnectImg} alt="WalletConnect" />
-          <div>WalletConnect</div>
-        </button>
-        {/* <button className="Wallet-btn Exodus-btn" onClick={activateExodus}>
-          <img src={exodusImg} alt="Exodus" />
-          <div>Exodus</div>
-        </button> */}
-      </Modal>
+
       <Modal
         className="App-settings"
         isVisible={isSettingsVisible}
@@ -808,9 +737,11 @@ function FullApp() {
             <span style={{ marginLeft: 5 }}>Include PnL in leverage display</span>
           </Checkbox>
         </div>
-        <div className="Exchange-settings-row" style={{marginTop:"30px"}}>
-          <button className="App-cta Exchange-swap-button" onClick={saveAndCloseSettings}
-            style={{fontSize:"16px",color:"#F5F6F8",fontWeight:"500"}}
+        <div className="Exchange-settings-row" style={{ marginTop: "30px" }}>
+          <button
+            className="App-cta Exchange-swap-button"
+            onClick={saveAndCloseSettings}
+            style={{ fontSize: "16px", color: "#F5F6F8", fontWeight: "500" }}
           >
             Save
           </button>
@@ -909,14 +840,21 @@ function PreviewApp() {
 }
 
 function App() {
+  const [web3Onboard, setWeb3Onboard] = useState(null);
+
+  useEffect(() => {
+    setWeb3Onboard(initWeb3Onboard);
+  }, []);
+
+  if (!web3Onboard) return <div>Loading...</div>;
 
   return (
     <SWRConfig value={{ refreshInterval: 15000, dedupingInterval: 5000 }}>
-      <Web3ReactProvider getLibrary={getLibrary}>
+      <Web3OnboardProvider web3Onboard={web3Onboard}>
         <SEO>
           <FullApp />
         </SEO>
-      </Web3ReactProvider>
+      </Web3OnboardProvider>
     </SWRConfig>
   );
 }

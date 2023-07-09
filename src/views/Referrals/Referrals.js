@@ -1,33 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useWeb3React } from "@web3-react/core";
 
+import { decodeReferralCode, encodeReferralCode, useReferralsData } from "../../Api/referrals";
+import Footer from "../../Footer";
+import {
+  MAX_REFERRAL_CODE_LENGTH,
+  POLYGON_ZKEVM,
+  REFERRALS_SELECTED_TAB_KEY,
+  REFERRAL_CODE_KEY,
+  REFERRAL_CODE_QUERY_PARAMS,
+  USD_DECIMALS,
+  bigNumberify,
+  formatAmount,
+  formatDate,
+  getExplorerUrl,
+  getPageTitle,
+  helperToast,
+  isAddressZero,
+  isHashZero,
+  shortenAddress,
+  useChainId,
+  useDebounce,
+  useLocalStorageSerializeKey,
+} from "../../Helpers";
 import Card from "../../components/Common/Card";
 import SEO from "../../components/Common/SEO";
 import Tab from "../../components/Tab/Tab";
-import Footer from "../../Footer";
-import {
-  useChainId,
-  getPageTitle,
-  formatAmount,
-  USD_DECIMALS,
-  helperToast,
-  formatDate,
-  getExplorerUrl,
-  shortenAddress,
-  bigNumberify,
-  REFERRAL_CODE_QUERY_PARAMS,
-  MAX_REFERRAL_CODE_LENGTH,
-  isHashZero,
-  REFERRALS_SELECTED_TAB_KEY,
-  REFERRAL_CODE_KEY,
-  useLocalStorageSerializeKey,
-  useDebounce,
-  isAddressZero,
-  POLYGON_ZKEVM,
-} from "../../Helpers";
-import { decodeReferralCode, encodeReferralCode, useReferralsData } from "../../Api/referrals";
 
-import "./Referrals.css";
+import { BiCopy, BiEditAlt, BiErrorCircle } from "react-icons/bi";
+import { FiPlus } from "react-icons/fi";
+import { useCopyToClipboard, useLocalStorage } from "react-use";
 import {
   getReferralCodeOwner,
   registerReferralCode,
@@ -36,15 +37,14 @@ import {
   useReferrerTier,
   useUserReferralCode,
 } from "../../Api";
-import { BiCopy, BiEditAlt, BiErrorCircle } from "react-icons/bi";
-import Tooltip from "../../components/Tooltip/Tooltip";
-import { useCopyToClipboard, useLocalStorage } from "react-use";
+import { getImageUrl } from "../../cloudinary/getImageUrl";
+import Checkbox from "../../components/Checkbox/Checkbox";
 import Loader from "../../components/Common/Loader";
 import Modal from "../../components/Modal/Modal";
-import { FiPlus } from "react-icons/fi";
-import { getToken, getNativeToken } from "../../data/Tokens";
-import Checkbox from "../../components/Checkbox/Checkbox";
-import { getImageUrl } from "../../cloudinary/getImageUrl";
+import Tooltip from "../../components/Tooltip/Tooltip";
+import { getNativeToken, getToken } from "../../data/Tokens";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
+import "./Referrals.css";
 
 const REFERRAL_DATA_MAX_TIME = 60000 * 5; // 5 minutes
 const TRADERS = "Traders";
@@ -136,7 +136,7 @@ function getCodeError(value) {
 }
 
 function Referrals({ connectWallet, setPendingTxns, pendingTxns }) {
-  const { active, account, library, chainId: chainIdWithoutLocalStorage } = useWeb3React();
+  const { active, account, library, chainId: chainIdWithoutLocalStorage } = useWeb3Onboard();
   const { chainId } = useChainId();
   const [activeTab, setActiveTab] = useLocalStorage(REFERRALS_SELECTED_TAB_KEY, TRADERS);
   const { data: referralsData, loading } = useReferralsData(chainIdWithoutLocalStorage, account);
@@ -152,7 +152,11 @@ function Referrals({ connectWallet, setPendingTxns, pendingTxns }) {
   useEffect(() => {
     if (active && referralsData && referralsData.codes && referralsData.codes.length > 0) {
       setNeedHelp(false);
-    } else if (active && userReferralCode && userReferralCode !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+    } else if (
+      active &&
+      userReferralCode &&
+      userReferralCode !== "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ) {
       setNeedHelp(false);
     } else {
       setNeedHelp(true);
@@ -293,91 +297,95 @@ function Referrals({ connectWallet, setPendingTxns, pendingTxns }) {
       <div className="referrals-header-big">
         <div className="referrals-header">
           <div className="referrals-header--text">
-            <h3>Invite Friends & <br/>Earn Commissions</h3>
-            <p>Enjoy Fee-Cashback and Fee-Commissions through <br/> the Quick Perpetual referral program.</p>
+            <h3>
+              Invite Friends & <br />
+              Earn Commissions
+            </h3>
+            <p>
+              Enjoy Fee-Cashback and Fee-Commissions through <br /> the Quick Perpetual referral program.
+            </p>
           </div>
         </div>
       </div>
       <div className="default-container page-layout Referrals">
         <div className="ref-layout">
-          {needHelp && (//instruction section start
-          <div className="instructions-container">
-            <div className="instruction-container">
-              <div className="instruction-container--header">
-                <span>01</span>
-                <p>Click on the ‘Affiliates’ tab </p>
+          {needHelp && ( //instruction section start
+            <div className="instructions-container">
+              <div className="instruction-container">
+                <div className="instruction-container--header">
+                  <span>01</span>
+                  <p>Click on the ‘Affiliates’ tab </p>
+                </div>
+                <div className="instruction-container--icon">
+                  <img
+                    width={74}
+                    height={74}
+                    src={getImageUrl({
+                      path: "illustration/ref-aff",
+                      format: "png",
+                      width: 100,
+                      height: 100,
+                      quality: 100,
+                    })}
+                    alt="Affiliates"
+                  />
+                </div>
               </div>
-              <div className="instruction-container--icon">
-                <img
-                  width={74}
-                  height={74}
-                  src={getImageUrl({
-                    path: "illustration/ref-aff",
-                    format: "png",
-                    width: 100,
-                    height: 100,
-                    quality: 100,
-                  })}
-                  alt="Affiliates"
-                />
+              <div className="instruction-container">
+                <div className="instruction-container--header">
+                  <span>02</span>
+                  <p>Enter your own unique code (Combination of Letters, Numbers or underscores) e.g. Qpx_10</p>
+                </div>
+                <div className="instruction-container--icon">
+                  <img
+                    width={74}
+                    height={74}
+                    src={getImageUrl({
+                      path: "illustration/ref-code",
+                      format: "png",
+                      width: 100,
+                      height: 100,
+                      quality: 100,
+                    })}
+                    alt="Referral Code"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="instruction-container">
-              <div className="instruction-container--header">
-                <span>02</span>
-                <p>
-                Enter your own unique code (Combination of Letters, Numbers or underscores) e.g. Qpx_10
-                </p>
+              <div className="instruction-container">
+                <div className="instruction-container--header">
+                  <span>03</span>
+                  <p>
+                    Share your referral link on social media.
+                    <br />
+                    Enjoy up to 15% Fee-Commission.
+                    <br />
+                    Referred Traders can get up to 10% Cashback.
+                  </p>
+                </div>
+                <div className="instruction-container--icon">
+                  <img
+                    width={74}
+                    height={74}
+                    src={getImageUrl({
+                      path: "illustration/ref-cashback",
+                      format: "png",
+                      width: 100,
+                      height: 100,
+                      quality: 100,
+                    })}
+                    alt="Cashback"
+                  />
+                </div>
               </div>
-              <div className="instruction-container--icon">
-                <img
-                  width={74}
-                  height={74}
-                  src={getImageUrl({
-                    path: "illustration/ref-code",
-                    format: "png",
-                    width: 100,
-                    height: 100,
-                    quality: 100,
-                  })}
-                  alt="Referral Code"
-                />
-              </div>
-            </div>
-            <div className="instruction-container">
-              <div className="instruction-container--header">
-                <span>03</span>
-                <p>
-                  Share your referral link on social media.
-                  <br />
-                  Enjoy up to 15% Fee-Commission.
-                  <br />
-                  Referred Traders can get up to 10% Cashback.
-                </p>
-              </div>
-              <div className="instruction-container--icon">
-                <img
-                  width={74}
-                  height={74}
-                  src={getImageUrl({
-                    path: "illustration/ref-cashback",
-                    format: "png",
-                    width: 100,
-                    height: 100,
-                    quality: 100,
-                  })}
-                  alt="Cashback"
-                />
-              </div>
-            </div>
-          </div> // instruction section end
+            </div> // instruction section end
           )}
           <div className="refs-container">
             <div className="ref-container">
-                <Tab options={TAB_OPTIONS} option={activeTab} setOption={setActiveTab} onChange={setActiveTab} />
-                {activeTab === AFFILIATES ? renderAffiliatesTab() : renderTradersTab()}
+              <Tab options={TAB_OPTIONS} option={activeTab} setOption={setActiveTab} onChange={setActiveTab} />
+              {activeTab === AFFILIATES ? renderAffiliatesTab() : renderTradersTab()}
             </div>
-            <a className="ref-link"
+            <a
+              className="ref-link"
               href="https://perps-docs.quickswap.exchange/our-referral-program"
               target="_blank"
               rel="noreferrer"
@@ -385,7 +393,8 @@ function Referrals({ connectWallet, setPendingTxns, pendingTxns }) {
               <span>For more details, see the Referral Program.</span>
               <span className="ref-link-icon">-&gt;</span>
             </a>
-            <a className="ref-link"
+            <a
+              className="ref-link"
               href="https://perps-analytics.quickswap.exchange/#/referrals"
               target="_blank"
               rel="noreferrer"
@@ -411,7 +420,7 @@ function CreateReferralCode({
   setRecentlyAddedCodes,
   recentlyAddedCodes,
   chainId,
-  needHelp
+  needHelp,
 }) {
   const [referralCode, setReferralCode] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -553,11 +562,7 @@ function CreateReferralCode({
             </button>
           </form>
         ) : (
-          <button
-            className="App-cta action-button"
-            type="submit"
-            onClick={connectWallet}
-          >
+          <button className="App-cta action-button" type="submit" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
@@ -1195,20 +1200,12 @@ function JoinReferralCode({
                 {error}
               </p>
             )}
-            <button
-              className="App-cta action-button"
-              type="submit"
-              disabled={!referralCode.trim() || isSubmitting}
-            >
+            <button className="App-cta action-button" type="submit" disabled={!referralCode.trim() || isSubmitting}>
               {isSubmitting ? "SUBMITTING.." : "SUBMIT"}
             </button>
           </form>
         ) : (
-          <button
-            className="App-cta action-button"
-            type="submit"
-            onClick={connectWallet}
-          >
+          <button className="App-cta action-button" type="submit" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
@@ -1238,11 +1235,7 @@ function EmptyMessage({ message = "", tooltipText }) {
   return (
     <div className="empty-message">
       {tooltipText ? (
-        <Tooltip
-          handle={<div>{message}</div>}
-          position="center-bottom"
-          renderContent={() => tooltipText}
-        />
+        <Tooltip handle={<div>{message}</div>} position="center-bottom" renderContent={() => tooltipText} />
       ) : (
         <p>{message}</p>
       )}

@@ -5,15 +5,14 @@ import RightArr from "../../assets/icons/RightArr";
 
 import { POLYGON_ZKEVM, switchNetwork, useChainId } from "../../Helpers";
 
-import { useWeb3React } from "@web3-react/core";
-
 import APRLabel from "../APRLabel/APRLabel";
 
 import { getImageUrl } from "../../cloudinary/getImageUrl";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 export default function TokenCard() {
   const { chainId } = useChainId();
-  const { active } = useWeb3React();
+  const { active } = useWeb3Onboard();
 
   const changeNetwork = useCallback(
     (network) => {
@@ -82,7 +81,12 @@ export default function TokenCard() {
                 </Link>
               </div>
 
-              <a href="https://perps-docs.quickswap.exchange/qlp" target="_blank" rel="noreferrer" className="btn-read-more">
+              <a
+                href="https://perps-docs.quickswap.exchange/qlp"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-read-more"
+              >
                 Read More <RightArr />
               </a>
             </div>

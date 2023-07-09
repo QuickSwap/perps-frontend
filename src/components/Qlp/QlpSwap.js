@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useHistory } from "react-router-dom";
 
-import { useWeb3React } from "@web3-react/core";
 import useSWR from "swr";
 import { ethers } from "ethers";
 
@@ -66,6 +65,7 @@ import { getImageUrl } from "../../cloudinary/getImageUrl";
 import Stake from "../../views/Stake/Stake";
 import AIRDROPAPR from "../../assets/icons/airdropAPR.jpg";
 import TooltipWithPortal from "../Tooltip/TooltipWithPortal";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 const { AddressZero } = ethers.constants;
 
@@ -97,7 +97,7 @@ export default function QlpSwap(props) {
   const history = useHistory();
   const swapLabel = isBuying ? "Add Liquidity" : "Withdraw Liquidity";
   const tabLabel = isBuying ? "Add Liquidity" : "Withdraw Liquidity";
-  const { active, library, account } = useWeb3React();
+  const { active, library, account } = useWeb3Onboard();
   const { chainId } = useChainId();
   // const chainName = getChainName(chainId)
   const tokens = getTokens(chainId);
@@ -274,7 +274,7 @@ export default function QlpSwap(props) {
   const usdcAPR = useMemo(() => {
     if (quickPrice > 0 && qlpSupplyUsd && qlpSupplyUsd > 0) {
       const qlpSupplyNumber = Number(formatAmount(qlpSupplyUsd, USD_DECIMALS, 2, false))
-      return 15000 * 365 * 100 / (7 * qlpSupplyNumber)
+      return 30000 * 365 * 100 / (7 * qlpSupplyNumber)
     }
     return 0
   }, [quickPrice, qlpSupplyUsd]);

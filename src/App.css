@@ -1670,3 +1670,17 @@ a:not([href]):not([class]):hover {
     padding: 6px 24px !important;
   }
 }
+
+.btn-red {
+  cursor: pointer;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 10px;
+  color: #F5F6F8;
+  text-decoration: none;
+  border: none;
+  font-size: 15px;
+  line-height: 24px;
+  background: #ff4444;
+  width: 100%;
+}

@@ -9,7 +9,6 @@
     "@davatar/react": "^1.8.1",
     "@ethersproject/providers": "^5.0.23",
     "@ethersproject/units": "^5.0.10",
-    "@gnosis.pm/safe-apps-web3-react": "^1.5.3",
     "@headlessui/react": "dev",
     "@material-ui/core": "^4.9.14",
     "@material-ui/icons": "^4.9.1",
@@ -19,13 +18,19 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "@web3-react/core": "^6.1.9",
-    "@web3-react/injected-connector": "^6.0.7",
-    "@web3-react/walletconnect-connector": "^6.2.8",
+    "@web3-onboard/coinbase": "^2.2.4",
+    "@web3-onboard/core": "^2.20.4",
+    "@web3-onboard/gas": "^2.1.8",
+    "@web3-onboard/injected-wallets": "^2.10.1",
+    "@web3-onboard/react": "^2.8.9",
+    "@web3-onboard/transaction-preview": "^2.0.8",
+    "@web3-onboard/trust": "^2.0.4",
+    "@web3-onboard/walletconnect": "^2.4.0",
     "axios": "^0.27.2",
     "bigdecimal": "^0.6.1",
     "body-scroll-lock": "^4.0.0-beta.0",
     "classnames": "^2.2.6",
+    "customize-cra": "^1.0.0",
     "date-fns": "^2.18.0",
     "ethers": "^5.0.31",
     "framer-motion": "^4.1.9",
@@ -33,6 +38,7 @@
     "hex-to-rgba": "^2.0.1",
     "html-to-image": "^1.9.0",
     "lodash": "^4.17.21",
+    "path-browserify": "^1.0.1",
     "qrcode.react": "^3.1.0",
     "rc-slider": "^9.7.2",
     "react": "^17.0.1",
@@ -42,7 +48,6 @@
     "react-icons": "^4.3.0",
     "react-jazzicon": "^1.0.4",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^4.0.3",
     "react-select": "^5.2.1",
     "react-tabs": "^3.2.3",
     "react-toastify": "6.0.9",
@@ -51,34 +56,56 @@
     "swr": "^0.4.2",
     "web-vitals": "^1.0.1"
   },
-  "resolutions": {
-    "react-error-overlay": "6.0.9"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-app-rewired start",
+    "start-staging": "REACT_APP_API_URL=wss://staging.api.blocknative.com/v0 REACT_APP_STAGING=true HTTPS=true HTTPS=true react-scripts start",
+    "start-local": "REACT_APP_API_URL=ws://localhost:54100/v0 REACT_APP_STAGING=true HTTPS=true react-scripts start",
+    "build": "react-app-rewired build",
+    "build-staging": "REACT_APP_API_URL=wss://staging.api.blocknative.com/v0 REACT_APP_STAGING=true react-app-rewired build",
+    "start:old": "react-scripts start",
+    "build:old": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "lint": "node node_modules/.bin/eslint src",
-    "pre-commit": "npm run test -- --watchAll=false && npm run lint",
-    "prepare": "husky install"
+    "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all",
+      "chrome >= 67",
+      "edge >= 79",
+      "firefox >= 68",
+      "opera >= 54",
+      "safari >= 14"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
     ]
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ],
   "devDependencies": {
+    "@types/node": "^18.7.13",
+    "@types/react": "^18.0.17",
+    "@types/react-dom": "^18.0.6",
+    "assert": "^2.0.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
     "eslint": "^7.20.0",
+    "https-browserify": "^1.0.0",
     "husky": "^7.0.0",
     "lint-staged": "^12.3.4",
-    "prettier": "^2.5.1"
+    "os-browserify": "^0.3.0",
+    "prettier": "^2.0.5",
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "react-dev-utils": "^12.0.1",
+    "react-scripts": "5.0.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "typescript": "^4.8.2",
+    "url": "^0.11.0"
   },
   "lint-staged": {
     "**/*.js?(x)": [

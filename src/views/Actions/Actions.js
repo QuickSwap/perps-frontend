@@ -1,7 +1,6 @@
 import React from "react";
 import useSWR from "swr";
 import { ethers } from "ethers";
-import { useWeb3React } from "@web3-react/core";
 import { useParams } from "react-router-dom";
 
 import "./Actions.css";
@@ -18,12 +17,13 @@ import OrdersList from "../../components/Exchange/OrdersList";
 
 import TradeHistory from "../../components/Exchange/TradeHistory";
 import Reader from "../../abis/Reader.json";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 const USD_DECIMALS = 30;
 
 export default function Actions() {
   const { account } = useParams();
-  const { active, library } = useWeb3React();
+  const { active, library } = useWeb3Onboard();
 
   const { chainId } = useChainId();
   const nativeTokenAddress = getContract(chainId, "NATIVE_TOKEN");

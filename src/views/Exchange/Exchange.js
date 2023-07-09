@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback, forwardRef, useImperativeHandle } from "react";
 
-import { useWeb3React } from "@web3-react/core";
 import useSWR from "swr";
 import { ethers } from "ethers";
 import cx from "classnames";
@@ -55,6 +54,7 @@ import Disclaimer from "../../components/Exchange/Disclaimer";
 import "./Exchange.css";
 import { TradeFailed } from "../../components/Exchange/TradeFailed";
 import { useModalContext } from "../../components/Modal/ModalProvider";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 const { AddressZero } = ethers.constants;
 
 const PENDING_POSITION_VALID_DURATION = 600 * 1000;
@@ -379,7 +379,7 @@ export const Exchange = forwardRef((props, ref) => {
     window.scrollTo(0, 0);
   }, []);
 
-  const { active, account, library } = useWeb3React();
+  const { active, account, library } = useWeb3Onboard();
   const { chainId } = useChainId();
   const currentAccount = account;
 

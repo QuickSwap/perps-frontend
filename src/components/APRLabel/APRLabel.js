@@ -1,5 +1,4 @@
 import React from "react";
-
 import useSWR from "swr";
 
 import {
@@ -8,21 +7,20 @@ import {
   formatKeyAmount,
   getBalanceAndSupplyData,
   getDepositBalanceData,
-  getStakingData,
   getProcessedData,
+  getStakingData,
 } from "../../Helpers";
 
-import Vault from "../../abis/Vault.json";
+import QlpManager from "../../abis/QlpManager.json";
 import Reader from "../../abis/Reader.json";
 import RewardReader from "../../abis/RewardReader.json";
-import QlpManager from "../../abis/QlpManager.json";
-
-import { useWeb3React } from "@web3-react/core";
+import Vault from "../../abis/Vault.json";
 
 import { getContract } from "../../Addresses";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 export default function APRLabel({ chainId, label }) {
-  let { active } = useWeb3React();
+  let { active } = useWeb3Onboard();
 
   const rewardReaderAddress = getContract(chainId, "RewardReader");
   const readerAddress = getContract(chainId, "Reader");
@@ -31,25 +29,15 @@ export default function APRLabel({ chainId, label }) {
   const nativeTokenAddress = getContract(chainId, "NATIVE_TOKEN");
   const qlpAddress = getContract(chainId, "QLP");
 
-
   const stakedQlpTrackerAddress = getContract(chainId, "StakedQlpTracker");
   const feeQlpTrackerAddress = getContract(chainId, "FeeQlpTracker");
 
   const qlpManagerAddress = getContract(chainId, "QlpManager");
 
   const walletTokens = [qlpAddress];
-  const depositTokens = [
-
-    qlpAddress,
-  ];
-  const rewardTrackersForDepositBalances = [
-
-    feeQlpTrackerAddress,
-  ];
-  const rewardTrackersForStakingInfo = [
-    stakedQlpTrackerAddress,
-    feeQlpTrackerAddress,
-  ];
+  const depositTokens = [qlpAddress];
+  const rewardTrackersForDepositBalances = [feeQlpTrackerAddress];
+  const rewardTrackersForStakingInfo = [stakedQlpTrackerAddress, feeQlpTrackerAddress];
 
   const { data: walletBalances } = useSWR(
     [`StakeV2:walletBalances:${active}`, chainId, readerAddress, "getTokenBalancesWithSupplies", PLACEHOLDER_ACCOUNT],
@@ -72,8 +60,6 @@ export default function APRLabel({ chainId, label }) {
     }
   );
 
-
-
   const { data: aums } = useSWR([`StakeV2:getAums:${active}`, chainId, qlpManagerAddress, "getAums"], {
     fetcher: fetcher(undefined, QlpManager),
   });
@@ -85,7 +71,6 @@ export default function APRLabel({ chainId, label }) {
     }
   );
 
-
   let aum;
   if (aums && aums.length > 0) {
     aum = aums[0].add(aums[1]).div(2);
@@ -95,14 +80,13 @@ export default function APRLabel({ chainId, label }) {
   const depositBalanceData = getDepositBalanceData(depositBalances);
   const stakingData = getStakingData(stakingInfo);
 
-
   const processedData = getProcessedData(
     balanceData,
     supplyData,
     depositBalanceData,
     stakingData,
     aum,
-    nativeTokenPrice,
+    nativeTokenPrice
   );
 
   return <>{`${formatKeyAmount(processedData, label, 2, 2, true)}%`}</>;

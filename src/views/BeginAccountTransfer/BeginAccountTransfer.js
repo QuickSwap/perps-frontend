@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import useSWR from "swr";
 import { ethers } from "ethers";
-import { useWeb3React } from "@web3-react/core";
 
 import { getContract } from "../../Addresses";
 import { callContract } from "../../Api";
@@ -18,6 +17,7 @@ import { FaCheck, FaTimes } from "react-icons/fa";
 import { fetcher, useChainId } from "../../Helpers";
 
 import "./BeginAccountTransfer.css";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 function ValidationRow({ isValid, children }) {
   return (
@@ -33,7 +33,7 @@ function ValidationRow({ isValid, children }) {
 
 export default function BeginAccountTransfer(props) {
   const { setPendingTxns } = props;
-  const { active, library, account } = useWeb3React();
+  const { active, library, account } = useWeb3Onboard();
   const { chainId } = useChainId();
 
   const [receiver, setReceiver] = useState("");

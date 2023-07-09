@@ -5,10 +5,11 @@ import coingeckoIcon from "../../img/coingecko.png";
 import maticIcon from "../../img/ic_polygon_16.svg";
 import metamaskIcon from "../../img/ic_metamask_hover_16.svg";
 import { addTokenToMetamask, ICONLINKS, platformTokens, useChainId } from "../../Helpers";
-import { useWeb3React } from "@web3-react/core";
+
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 function AssetDropdown({ assetSymbol, assetInfo }) {
-  const { active } = useWeb3React();
+  const { active } = useWeb3Onboard();
   const { chainId } = useChainId();
   let { coingecko, polygon } = ICONLINKS[chainId][assetSymbol];
   const unavailableTokenSymbols = {

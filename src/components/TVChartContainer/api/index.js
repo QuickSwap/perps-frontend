@@ -11,7 +11,6 @@ const config = {
     supported_resolutions: supportedResolutions
 }; 
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
 	onReady: cb => {
 	// console.log('=====onReady running')	

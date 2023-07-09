@@ -1,10 +1,10 @@
-import React from 'react'
+import React from "react";
 import { NavLink } from "react-router-dom";
-import './HeaderNav.css'
+import "./HeaderNav.css";
 
-export default function HeaderNav() { 
+export default function HeaderNav() {
   return (
-    <div className="App-header-links mobile-header-padding" style={{display:'flex'}}>
+    <div className="App-header-links mobile-header-padding" style={{ display: "flex" }}>
       <div className="App-header-link-container">
         <NavLink activeClassName="active" to="/trade">
           Trade
@@ -17,7 +17,7 @@ export default function HeaderNav() {
       </div>
       <div className="App-header-link-container">
         <NavLink activeClassName="active" to="/liquidity">
-        Liquidity
+          Liquidity
         </NavLink>
       </div>
       <div className="App-header-link-container">
@@ -26,33 +26,20 @@ export default function HeaderNav() {
         </NavLink>
       </div>
       <div className="App-header-link-container">
-      <a href="https://perps-leaderboard.quickswap.exchange" target="_blank" rel="noopener noreferrer">
-          <span
-            className="hover-white"
-          >
-            Leaderboard
-          </span>
+        <a href="https://perps-leaderboard.quickswap.exchange" target="_blank" rel="noopener noreferrer">
+          <span className="hover-white">Leaderboard</span>
         </a>
       </div>
       <div className="App-header-link-container">
-      <a href="https://perps-analytics.quickswap.exchange" target="_blank" rel="noopener noreferrer">
-          <span
-            className="hover-white"
-          >
-            Analytics
-          </span>
+        <a href="https://perps-analytics.quickswap.exchange" target="_blank" rel="noopener noreferrer">
+          <span className="hover-white">Analytics</span>
         </a>
       </div>
       <div className="App-header-link-container">
-      <a href="https://perps-docs.quickswap.exchange" target="_blank" rel="noopener noreferrer">
-          <span
-            className="hover-white"
-          >
-            Docs
-          </span>
+        <a href="https://perps-docs.quickswap.exchange" target="_blank" rel="noopener noreferrer">
+          <span className="hover-white">Docs</span>
         </a>
       </div>
-
     </div>
-  )
+  );
 }

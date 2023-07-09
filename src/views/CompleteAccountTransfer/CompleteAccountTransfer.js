@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ethers } from "ethers";
-import { useWeb3React } from "@web3-react/core";
 import { useCopyToClipboard } from "react-use";
 
 import { getContract } from "../../Addresses";
@@ -14,12 +13,13 @@ import Footer from "../../Footer";
 import RewardRouter from "../../abis/RewardRouter.json";
 
 import "./CompleteAccountTransfer.css";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 export default function CompleteAccountTransfer(props) {
   const [, copyToClipboard] = useCopyToClipboard();
   const { sender, receiver } = useParams();
   const { setPendingTxns } = props;
-  const { library, account } = useWeb3React();
+  const { library, account } = useWeb3Onboard();
   const [isTransferSubmittedModalVisible, setIsTransferSubmittedModalVisible] = useState(false);
 
   const { chainId } = useChainId();

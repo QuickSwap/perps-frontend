@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { useWeb3React } from "@web3-react/core";
 import cx from "classnames";
 import stream from "../TVChartContainer/api/stream";
 
@@ -21,6 +20,7 @@ import { useChartPrices, useQuickV3Pair } from "../../Api";
 
 import { getTokens, getToken } from "../../data/Tokens";
 import ChartTokenSelector from "./ChartTokenSelector";
+import useWeb3Onboard from "../../hooks/useWeb3Onboard";
 
 const PRICE_LINE_TEXT_WIDTH = 15;
 
@@ -72,7 +72,7 @@ export default function ExchangeTVChart(props) {
     isQSSwap
   } = props;
 
-  const { library, account, active } = useWeb3React();
+  const { library, account, active } = useWeb3Onboard();
 
   let [period, setPeriod] = useLocalStorageSerializeKey([chainId, "Chart-period"], DEFAULT_PERIOD);
   if (!(period in CHART_PERIODS)) {

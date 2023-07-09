@@ -2,7 +2,6 @@ const axios = require("axios").default;
 const api_root = process.env.REACT_APP_STATS_API_URL;
 const history = {};
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   history: history,
 
