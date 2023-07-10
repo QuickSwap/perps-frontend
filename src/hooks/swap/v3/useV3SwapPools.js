@@ -13,6 +13,8 @@ export function useV3SwapPools(currencyIn, currencyOut) {
 
   const pools = usePools(allCurrencyCombinations);
 
+  console.log("aaa", pools);
+
   return useMemo(() => {
     return {
       pools: pools

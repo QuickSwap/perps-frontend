@@ -1,7 +1,6 @@
 import { POOL_DEPLOYER_ADDRESS, PoolState } from "../../../utils/quickswap/v3/constants";
 import { useEffect, useMemo, useState } from "react";
 import poolAbi from "../../../abis/quickswap/Pool.json";
-import { usePreviousNonErroredArray } from "./usePrevious";
 import { Pool } from "@uniswap/v3-sdk";
 import { computePoolAddress } from "../../../utils/quickswap/v3/computePoolAddress";
 import { getProvider, useChainId } from "../../../Helpers";
@@ -43,69 +42,37 @@ export function usePools(poolKeys) {
 
   const poolAddressStr = poolAddresses.filter((address) => !!address).join("_");
 
-  const polygonWsProvider = getProvider(null, chainId);
-
   useEffect(() => {
+    const polygonWsProvider = getProvider(null, chainId);
     if (!polygonWsProvider) return;
     (async () => {
       const poolAddressArr = poolAddressStr.split("_").filter((address) => !!address);
 
       const poolData = await Promise.all(
         poolAddressArr.map(async (address) => {
+          const poolContract = new ethers.Contract(address, poolAbi, polygonWsProvider);
+          let globalState, liquidity;
           try {
-            const poolContract = new ethers.Contract(address, poolAbi, polygonWsProvider);
-            console.log("bbb", poolContract);
-            const globalState = await poolContract.globalState();
-            console.log("ccc", globalState);
-            const liquidity = await poolContract.liquidity();
-            return { globalState, liquidity };
-          } catch (e) {
-            console.log("eer", e);
-          }
+            globalState = await poolContract.globalState();
+          } catch {}
+          try {
+            liquidity = await poolContract.liquidity();
+          } catch {}
+          return { globalState, liquidity };
         })
       );
-      setGlobalState0s(poolData.map((item) => item.globalState));
-      setLiquidities(poolData.map((item) => item.liquidity));
+
+      setGlobalState0s(poolData.map((item) => item?.globalState));
+      setLiquidities(poolData.map((item) => item?.liquidity));
     })();
-  }, [poolAddressStr, polygonWsProvider]);
-
-  // const globalState0s = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, "globalState");
-
-  // TODO: This is a bug, if all of the pool addresses error out, and the last call to use pools was from a different hook
-  // You will get the results which don't match the pool keys
-  const prevGlobalState0s = usePreviousNonErroredArray(globalState0s);
-
-  const _globalState0s = useMemo(() => {
-    if (!prevGlobalState0s || !globalState0s || globalState0s.length === 1) return globalState0s;
-
-    if (globalState0s.every((el) => el.error) && !prevGlobalState0s.every((el) => el.error)) return prevGlobalState0s;
-
-    return globalState0s;
-  }, [prevGlobalState0s, globalState0s]);
-
-  // const liquidities = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, "liquidity");
-  const prevLiquidities = usePreviousNonErroredArray(liquidities);
-
-  const _liquidities = useMemo(() => {
-    if (!prevLiquidities || !liquidities || liquidities.length === 1) return liquidities;
-
-    if (liquidities.every((el) => el.error) && !prevLiquidities.every((el) => el.error)) return prevLiquidities;
-
-    return liquidities;
-  }, [prevLiquidities, liquidities]);
+  }, [poolAddressStr, chainId]);
 
   return useMemo(() => {
     return poolKeys.map((_key, index) => {
       const [token0, token1] = transformed[index] ?? [];
-      const globalState0s = _globalState0s.length < index ? undefined : _globalState0s[index];
-      const liquidities = _liquidities.length < index ? undefined : _liquidities[index];
-      if (!token0 || !token1 || !globalState0s || !liquidities) return [PoolState.INVALID, null];
-
-      const { result: globalState, loading: globalStateLoading, valid: globalStateValid } = globalState0s;
-      const { result: liquidity, loading: liquidityLoading, valid: liquidityValid } = liquidities;
-
-      if (!globalStateValid || !liquidityValid) return [PoolState.INVALID, null];
-      if (globalStateLoading || liquidityLoading) return [PoolState.LOADING, null];
+      const globalState = globalState0s.length < index ? undefined : globalState0s[index];
+      const liquidity = liquidities.length < index ? undefined : liquidities[index];
+      if (!token0 || !token1) return [PoolState.INVALID, null];
 
       if (!globalState || !liquidity) return [PoolState.NOT_EXISTS, null];
 
@@ -120,7 +87,7 @@ export function usePools(poolKeys) {
         return [PoolState.NOT_EXISTS, null];
       }
     });
-  }, [_liquidities, poolKeys, _globalState0s, transformed]);
+  }, [liquidities, poolKeys, globalState0s, transformed]);
 }
 
 export function usePool(currencyA, currencyB) {
