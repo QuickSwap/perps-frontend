@@ -20,10 +20,10 @@ const DEFAULT_GAS_QUOTE = 2_000_000;
  * @param amountIn the amount to swap in
  * @param currencyOut the desired output currency
  */
-export function useBestV3TradeExactIn(amountIn, currencyOut) {
+export function useBestV3TradeExactIn(amountIn, currencyOut, inputCurrency) {
   const { chainId } = useChainId();
 
-  const { routes, loading: routesLoading } = useAllV3Routes(amountIn?.currency, currencyOut);
+  const { routes, loading: routesLoading } = useAllV3Routes(inputCurrency, currencyOut);
 
   const quoteExactInInputs = useMemo(() => {
     return routes.map((route) => [

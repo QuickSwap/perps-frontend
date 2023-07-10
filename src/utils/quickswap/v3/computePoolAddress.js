@@ -14,7 +14,8 @@ export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
  * @returns The pool address
  */
 export function computePoolAddress({ poolDeployer, tokenA, tokenB, initCodeHashManualOverride }) {
-  const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]; // does safety checks
+  const [token0, token1] =
+    tokenA.address.toLowerCase() < tokenB.address.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA]; // does safety checks
   return getCreate2Address(
     poolDeployer,
     keccak256(["bytes"], [defaultAbiCoder.encode(["address", "address"], [token0.address, token1.address])]),

@@ -1,14 +1,12 @@
 import { POOL_DEPLOYER_ADDRESS, PoolState } from "../../../utils/quickswap/v3/constants";
 import { useEffect, useMemo, useState } from "react";
-import abi from "../../../abis/quickswap/Pool.json";
-import { Interface } from "@ethersproject/abi";
+import poolAbi from "../../../abis/quickswap/Pool.json";
 import { usePreviousNonErroredArray } from "./usePrevious";
 import { Pool } from "@uniswap/v3-sdk";
 import { computePoolAddress } from "../../../utils/quickswap/v3/computePoolAddress";
-import { useChainId } from "../../../Helpers";
+import { getProvider, useChainId } from "../../../Helpers";
 import { ethers } from "ethers";
-
-const POOL_STATE_INTERFACE = new Interface(abi);
+import { getWrappedTokenV3 } from "../../../utils/quickswap/v3/getWrappedToken";
 
 export function usePools(poolKeys) {
   const { chainId } = useChainId();
@@ -17,10 +15,11 @@ export function usePools(poolKeys) {
     return poolKeys.map(([currencyA, currencyB]) => {
       if (!chainId || !currencyA || !currencyB) return null;
 
-      const tokenA = currencyA?.wrapped;
-      const tokenB = currencyB?.wrapped;
-      if (!tokenA || !tokenB || tokenA.equals(tokenB)) return null;
-      const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
+      const tokenA = getWrappedTokenV3(currencyA, chainId);
+      const tokenB = getWrappedTokenV3(currencyB, chainId);
+      if (!tokenA || !tokenB || tokenA.address.toLowerCase() === tokenB.address.toLowerCase()) return null;
+      const [token0, token1] =
+        tokenA.address.toLowerCase() < tokenB.address.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA];
       return [token0, token1];
     });
   }, [chainId, poolKeys]);
@@ -42,20 +41,33 @@ export function usePools(poolKeys) {
   const [globalState0s, setGlobalState0s] = useState([]);
   const [liquidities, setLiquidities] = useState([]);
 
+  const poolAddressStr = poolAddresses.filter((address) => !!address).join("_");
+
+  const polygonWsProvider = getProvider(null, chainId);
+
   useEffect(() => {
+    if (!polygonWsProvider) return;
     (async () => {
+      const poolAddressArr = poolAddressStr.split("_").filter((address) => !!address);
+
       const poolData = await Promise.all(
-        poolAddresses.map(async (address) => {
-          const poolContract = new ethers.Contract(address, POOL_STATE_INTERFACE);
-          const globalState = await poolContract.globalState();
-          const liquidity = await poolContract.liquidity();
-          return { globalState, liquidity };
+        poolAddressArr.map(async (address) => {
+          try {
+            const poolContract = new ethers.Contract(address, poolAbi, polygonWsProvider);
+            console.log("bbb", poolContract);
+            const globalState = await poolContract.globalState();
+            console.log("ccc", globalState);
+            const liquidity = await poolContract.liquidity();
+            return { globalState, liquidity };
+          } catch (e) {
+            console.log("eer", e);
+          }
         })
       );
       setGlobalState0s(poolData.map((item) => item.globalState));
       setLiquidities(poolData.map((item) => item.liquidity));
     })();
-  }, []);
+  }, [poolAddressStr, polygonWsProvider]);
 
   // const globalState0s = useMultipleContractSingleData(poolAddresses, POOL_STATE_INTERFACE, "globalState");
 

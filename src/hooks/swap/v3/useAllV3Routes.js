@@ -2,6 +2,7 @@ import { Route } from "@uniswap/v3-sdk";
 import { useMemo } from "react";
 import { useV3SwapPools } from "./useV3SwapPools";
 import { useChainId } from "../../../Helpers";
+import { getWrappedTokenV3 } from "../../../utils/quickswap/v3/getWrappedToken";
 
 /**
  * Returns true if poolA is equivalent to poolB
@@ -25,8 +26,8 @@ function computeAllRoutes(
   startCurrencyIn = currencyIn,
   maxHops = 2
 ) {
-  const tokenIn = currencyIn?.wrapped;
-  const tokenOut = currencyOut?.wrapped;
+  const tokenIn = getWrappedTokenV3(currencyIn, chainId);
+  const tokenOut = getWrappedTokenV3(currencyOut, chainId);
 
   if (!tokenIn || !tokenOut) throw new Error("Missing tokenIn/tokenOut");
 

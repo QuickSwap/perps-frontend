@@ -5,11 +5,14 @@ import {
 } from "../../../utils/quickswap/v3/constants";
 import { useMemo } from "react";
 import { useChainId } from "../../../Helpers";
+import { getWrappedTokenV3 } from "../../../utils/quickswap/v3/getWrappedToken";
 
 export function useAllCurrencyCombinations(currencyA, currencyB) {
   const { chainId } = useChainId();
 
-  const [tokenA, tokenB] = chainId ? [currencyA?.wrapped, currencyB?.wrapped] : [undefined, undefined];
+  const [tokenA, tokenB] = chainId
+    ? [getWrappedTokenV3(currencyA, chainId), getWrappedTokenV3(currencyB, chainId)]
+    : [undefined, undefined];
 
   const bases = useMemo(() => {
     if (!chainId) return [];
@@ -40,12 +43,17 @@ export function useAllCurrencyCombinations(currencyA, currencyB) {
             ...basePairs,
           ]
             // filter out invalid pairs comprised of the same asset (e.g. WETH<>WETH)
-            .filter(([t0, t1]) => !t0.equals(t1))
+            .filter(([t0, t1]) => t0.address.toLowerCase() !== t1.address.toLowerCase())
             // filter out duplicate pairs
             .filter(([t0, t1], i, otherPairs) => {
               // find the first index in the array at which there are the same 2 tokens as the current
               const firstIndexInOtherPairs = otherPairs.findIndex(([t0Other, t1Other]) => {
-                return (t0.equals(t0Other) && t1.equals(t1Other)) || (t0.equals(t1Other) && t1.equals(t0Other));
+                return (
+                  (t0.address.toLowerCase() === t0Other.address.toLowerCase() &&
+                    t1.address.toLowerCase() === t1Other.address.toLowerCase()) ||
+                  (t0.address.toLowerCase() === t1Other.address.toLowerCase() &&
+                    t1.address.toLowerCase() === t0Other.address.toLowerCase())
+                );
               });
               // only accept the first occurrence of the same 2 tokens
               return firstIndexInOtherPairs === i;

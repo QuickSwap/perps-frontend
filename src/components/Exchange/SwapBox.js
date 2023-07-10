@@ -83,6 +83,7 @@ import Router from "../../abis/Router.json";
 import Token from "../../abis/Token.json";
 import WETH from "../../abis/WETH.json";
 import SwapDropdown from "./SwapDropdown";
+import { useV3SwapInfo } from "../../hooks/swap/v3/useV3SwapInfo";
 
 const { AddressZero } = ethers.constants;
 
@@ -166,9 +167,9 @@ export default function SwapBox(props) {
     showModal,
     swapType,
     setSwapType,
-    quickswapTokens
+    quickswapTokens,
   } = props;
-  
+
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
   const [anchorOnFromAmount, setAnchorOnFromAmount] = useState(true);
@@ -319,6 +320,9 @@ export default function SwapBox(props) {
   const fromTokenInfo = getTokenInfo(infoTokens, fromTokenAddress);
   const toTokenInfo = getTokenInfo(infoTokens, toTokenAddress);
 
+  const v3AmountToPass = anchorOnFromAmount ? fromValue : toValue;
+  const v3Trade = useV3SwapInfo(v3AmountToPass, fromToken, toToken, anchorOnFromAmount);
+
   const renderAvailableLongLiquidity = () => {
     if (!isLong) {
       return null;
@@ -355,7 +359,9 @@ export default function SwapBox(props) {
   const fromAmount = parseValue(fromValue, fromToken && fromToken.decimals);
   const toAmount = parseValue(toValue, toToken && toToken.decimals);
 
-  const isPotentialWrap = (fromToken && toToken && fromToken.isNative && toToken.isWrapped) || (fromToken && toToken && fromToken.isWrapped && toToken.isNative);
+  const isPotentialWrap =
+    (fromToken && toToken && fromToken.isNative && toToken.isWrapped) ||
+    (fromToken && toToken && fromToken.isWrapped && toToken.isNative);
   const isWrapOrUnwrap = isSwap && isPotentialWrap;
   const needApproval =
     fromTokenAddress !== AddressZero &&
@@ -830,7 +836,6 @@ export default function SwapBox(props) {
   };
 
   const getLeverageError = () => {
-
     if (!toAmount || toAmount.eq(0)) {
       return ["Enter an amount"];
     }
@@ -1056,7 +1061,7 @@ export default function SwapBox(props) {
     const swapTokenSymbol = isLong ? toToken.symbol : shortCollateralToken.symbol;
     const inputTokenSymbol = isLong ? fromToken.symbol : shortCollateralToken.symbol;
 
-      let quickswapUrl = `https://quickswap.exchange/#/swap`;
+    let quickswapUrl = `https://quickswap.exchange/#/swap`;
     let kyberswapUrl = `https://kyberswap.com/swap/polygon/${inputCurrency}-to-${outputCurrency}`;
     const label =
       modalError === "BUFFER" ? `${shortCollateralToken.symbol} Required` : `${fromToken.symbol} Capacity Reached`;
@@ -1073,8 +1078,13 @@ export default function SwapBox(props) {
             </p>
           )}
           <div style={{ display: "flex", alignItems: "center", flexDirection: "column", gap: "10px" }}>
-                    <a style={{ textDecoration: "none", color: "#ffaa27" }} href={quickswapUrl} target="_blank" rel="noreferrer">
-                        Buy {swapTokenSymbol} on Quickswap
+            <a
+              style={{ textDecoration: "none", color: "#ffaa27" }}
+              href={quickswapUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Buy {swapTokenSymbol} on Quickswap
             </a>
             {/* <a
               style={{ textDecoration: "none", color: "#ffaa27" }}
@@ -1779,10 +1789,18 @@ export default function SwapBox(props) {
     feeBps = feeBasisPoints;
   }
   if (fromAmount?.gt(bigNumberify(0))) {
-    if (isSwap && isMarketOrder) {executionFee = 0;}
-    if (isSwap && !isMarketOrder) {executionFee = getConstant(chainId, "SWAP_ORDER_EXECUTION_GAS_FEE");}
-    if (!isSwap && isMarketOrder) {executionFee = getConstant(chainId, "INCREASE_ORDER_EXECUTION_GAS_FEE");}
-    if (!isSwap && !isMarketOrder) {executionFee = minExecutionFee;}
+    if (isSwap && isMarketOrder) {
+      executionFee = 0;
+    }
+    if (isSwap && !isMarketOrder) {
+      executionFee = getConstant(chainId, "SWAP_ORDER_EXECUTION_GAS_FEE");
+    }
+    if (!isSwap && isMarketOrder) {
+      executionFee = getConstant(chainId, "INCREASE_ORDER_EXECUTION_GAS_FEE");
+    }
+    if (!isSwap && !isMarketOrder) {
+      executionFee = minExecutionFee;
+    }
 
     if (executionFee > 0) {
       executionFeeUsd = getUsd(executionFee, nativeTokenAddress, false, infoTokens);
@@ -1841,28 +1859,29 @@ export default function SwapBox(props) {
       <div className="Exchange-swap-box-inner App-box-highlight">
         <div>
           <Tab
-            options={
-              SWAP_OPTIONS.map((option) => {
-                return option === SWAP ? 
-                  { 
-                    html: <div className="Exchange-swap-tab-wrapper">
-                            <p>{option}</p>
-                            <small>({swapTypes[swapType]})</small>
-                          </div>,
-                    value: option
-                  } : option
-              })
-            }
+            options={SWAP_OPTIONS.map((option) => {
+              return option === SWAP
+                ? {
+                    html: (
+                      <div className="Exchange-swap-tab-wrapper">
+                        <p>{option}</p>
+                        <small>({swapTypes[swapType]})</small>
+                      </div>
+                    ),
+                    value: option,
+                  }
+                : option;
+            })}
             option={swapOption}
             onChange={onSwapOptionChange}
             className="Exchange-swap-option-tabs tradePage"
           />
-          <div className='Exchange-swap-types-wrapper'>
+          <div className="Exchange-swap-types-wrapper">
             <SwapDropdown swapType={swapType} setSwapType={setSwapType} />
           </div>
-          <div className='Exchange-swap-menu'>
-            {flagOrdersEnabled && (
-              (!isSwap || swapType === SWAP_PERPS) ?
+          <div className="Exchange-swap-menu">
+            {flagOrdersEnabled &&
+              (!isSwap || swapType === SWAP_PERPS ? (
                 <Tab
                   options={orderOptions}
                   optionLabels={orderOptionLabels}
@@ -1871,8 +1890,9 @@ export default function SwapBox(props) {
                   option={orderOption}
                   onChange={onOrderOptionChange}
                 />
-              : <div style={{margin: '10px 0'}} />
-            )}
+              ) : (
+                <div style={{ margin: "10px 0" }} />
+              ))}
           </div>
         </div>
         {showFromAndToSection && (
@@ -1928,7 +1948,7 @@ export default function SwapBox(props) {
             </div>
             <div className="Exchange-swap-ball-container">
               <div className="Exchange-swap-ball" onClick={switchTokens}>
-                <img src={arrowIcon} alt="arrowIcon"/>
+                <img src={arrowIcon} alt="arrowIcon" />
               </div>
             </div>
             <div className="Exchange-swap-section">
@@ -2057,33 +2077,44 @@ export default function SwapBox(props) {
             <ExchangeInfoRow label="Fees">
               <div>
                 {!fees && "-"}
-                {fees && (<>
-                  <Tooltip
-                    handle={`$${formatAmount(totalFeesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)}`}
-                    position="right-bottom"
-                    renderContent={() => {
-                      return (
-                        <>
-                          <div>
-                            Swap Fee ({formatAmount(feeBps, 2, 2, false)}% of swap size):
-                            &nbsp; {formatAmount(fees, fromToken.decimals, 4, true)}
-                            &nbsp; {fromToken.symbol}
-                            &nbsp; (${formatAmount(feesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
-                          </div>
-                          {isMarketOrder ? <></> : (<>
-                            <br />
+                {fees && (
+                  <>
+                    <Tooltip
+                      handle={`$${formatAmount(totalFeesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)}`}
+                      position="right-bottom"
+                      renderContent={() => {
+                        return (
+                          <>
                             <div>
-                              Execution Fee: &nbsp;
-                              {formatAmount(executionFee, nativeTokenSymbol.decimals, nativeTokenSymbol.displayDecimals, true)}
-                              &nbsp; {nativeTokenSymbol}
-                              &nbsp; (${formatAmount(executionFeeUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
-                            </div></>)
-                          }
-                        </>
-                      );
-                    }}
-                  />
-                </>)}
+                              Swap Fee ({formatAmount(feeBps, 2, 2, false)}% of swap size): &nbsp;{" "}
+                              {formatAmount(fees, fromToken.decimals, 4, true)}
+                              &nbsp; {fromToken.symbol}
+                              &nbsp; (${formatAmount(feesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
+                            </div>
+                            {isMarketOrder ? (
+                              <></>
+                            ) : (
+                              <>
+                                <br />
+                                <div>
+                                  Execution Fee: &nbsp;
+                                  {formatAmount(
+                                    executionFee,
+                                    nativeTokenSymbol.decimals,
+                                    nativeTokenSymbol.displayDecimals,
+                                    true
+                                  )}
+                                  &nbsp; {nativeTokenSymbol}
+                                  &nbsp; (${formatAmount(executionFeeUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
+                                </div>
+                              </>
+                            )}
+                          </>
+                        );
+                      }}
+                    />
+                  </>
+                )}
               </div>
             </ExchangeInfoRow>
           </div>
@@ -2231,7 +2262,12 @@ export default function SwapBox(props) {
                           <br />
                           <div>
                             Execution Fee: &nbsp;
-                            {formatAmount(executionFee, nativeTokenSymbol.decimals, nativeTokenSymbol.displayDecimals, true)}
+                            {formatAmount(
+                              executionFee,
+                              nativeTokenSymbol.decimals,
+                              nativeTokenSymbol.displayDecimals,
+                              true
+                            )}
                             &nbsp; {nativeTokenSymbol}
                             &nbsp; (${formatAmount(executionFeeUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
                           </div>
@@ -2264,11 +2300,7 @@ export default function SwapBox(props) {
           </div>
         )}
         <div className="Exchange-swap-button-container">
-          <button
-            className="App-cta Exchange-swap-button"
-            onClick={onClickPrimary}
-            disabled={!isPrimaryEnabled()}
-          >
+          <button className="App-cta Exchange-swap-button" onClick={onClickPrimary} disabled={!isPrimaryEnabled()}>
             {getPrimaryText()}
           </button>
         </div>
