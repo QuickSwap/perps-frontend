@@ -1,0 +1,60 @@
+.swap-menu-wrapper {
+  position: relative;
+}
+
+.swap-menu-main {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: flex-end;
+}
+
+.swap-menu-main p {
+  margin: 0 12px 0 0;
+}
+
+.swap-menu-items {
+  position: absolute;
+  top: 40px;
+  border-radius: 8px;
+  background: #282D3D;
+  box-shadow:8px 3px 16px #12131a4d;
+  outline: none;
+  z-index: 100;
+  font-size: 14px;
+  overflow: hidden;
+  font-weight: normal !important;
+  min-width: 120px;
+  right: 0;
+}
+
+.dropdown-arrow {
+  margin-left: 0.5rem;
+  cursor: pointer;
+  color: white;
+  opacity: 0.8;
+  display: flex;
+}
+.dropdown-arrow:hover {
+  opacity: 1;
+}
+
+.swap-menu-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #C7CAD9;
+  text-decoration: none;
+  padding: 5px;
+}
+.swap-menu-item:hover {
+  background: rgba(118, 118, 128, 0.24);
+  border-radius: 4px 4px 0 0;
+  color: white !important;
+}
+.swap-menu-item p {
+  margin: 0;
+  margin-left: 5px;
+  font-size: 14px !important;
+  line-height: 40px !important;
+}

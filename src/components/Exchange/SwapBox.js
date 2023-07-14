@@ -61,6 +61,10 @@ import {
   adjustForDecimals,
   REFERRAL_CODE_KEY,
   isHashZero,
+  SWAP_PERPS,
+  SWAP_QUICK_V3,
+  swapTypes,
+  SWAP_QUICK_BEST_TRADE,
 } from "../../Helpers";
 import { getConstant } from "../../Constants";
 import * as Api from "../../Api";
@@ -78,6 +82,8 @@ import PositionRouter from "../../abis/PositionRouter.json";
 import Router from "../../abis/Router.json";
 import Token from "../../abis/Token.json";
 import WETH from "../../abis/WETH.json";
+import SwapDropdown from "./SwapDropdown";
+import { useV3SwapInfo } from "../../hooks/swap/v3/useV3SwapInfo";
 
 const { AddressZero } = ethers.constants;
 
@@ -159,6 +165,9 @@ export default function SwapBox(props) {
     minExecutionFeeUSD,
     minExecutionFeeErrorMessage,
     showModal,
+    swapType,
+    setSwapType,
+    quickswapTokens,
   } = props;
 
   const [fromValue, setFromValue] = useState("");
@@ -247,14 +256,15 @@ export default function SwapBox(props) {
   const existingPosition = positionKey ? positionsMap[positionKey] : undefined;
   const hasExistingPosition = existingPosition && existingPosition.size && existingPosition.size.gt(0);
 
+  const isQSSwap = swapType === SWAP_QUICK_V3 || swapType === SWAP_QUICK_BEST_TRADE;
   const whitelistedTokens = getWhitelistedTokens(chainId);
   const tokens = getTokens(chainId);
-  const fromTokens = tokens;
+  const fromTokens = isQSSwap ? quickswapTokens : tokens;
   const stableTokens = tokens.filter((token) => token.isStable);
   const indexTokens = whitelistedTokens.filter((token) => !token.isStable && !token.isWrapped);
   const shortableTokens = indexTokens.filter((token) => token.isShortable);
 
-  let toTokens = tokens;
+  let toTokens = isQSSwap ? quickswapTokens : tokens;
   if (isLong) {
     toTokens = indexTokens;
   }
@@ -303,12 +313,15 @@ export default function SwapBox(props) {
     }
   );
 
-  const fromToken = getToken(chainId, fromTokenAddress);
-  const toToken = getToken(chainId, toTokenAddress);
+  const fromToken = getToken(chainId, fromTokenAddress, quickswapTokens, isQSSwap);
+  const toToken = getToken(chainId, toTokenAddress, quickswapTokens, isQSSwap);
   const shortCollateralToken = getTokenInfo(infoTokens, shortCollateralAddress);
 
   const fromTokenInfo = getTokenInfo(infoTokens, fromTokenAddress);
   const toTokenInfo = getTokenInfo(infoTokens, toTokenAddress);
+
+  const v3AmountToPass = anchorOnFromAmount ? fromValue : toValue;
+  const v3Trade = useV3SwapInfo(v3AmountToPass, fromToken, toToken, anchorOnFromAmount);
 
   const renderAvailableLongLiquidity = () => {
     if (!isLong) {
@@ -346,7 +359,9 @@ export default function SwapBox(props) {
   const fromAmount = parseValue(fromValue, fromToken && fromToken.decimals);
   const toAmount = parseValue(toValue, toToken && toToken.decimals);
 
-  const isPotentialWrap = (fromToken.isNative && toToken.isWrapped) || (fromToken.isWrapped && toToken.isNative);
+  const isPotentialWrap =
+    (fromToken && toToken && fromToken.isNative && toToken.isWrapped) ||
+    (fromToken && toToken && fromToken.isWrapped && toToken.isNative);
   const isWrapOrUnwrap = isSwap && isPotentialWrap;
   const needApproval =
     fromTokenAddress !== AddressZero &&
@@ -372,9 +387,9 @@ export default function SwapBox(props) {
   }, [toTokenInfo, fromTokenInfo]);
 
   const maxToTokenOut = useMemo(() => {
-    const value = toTokenInfo.availableAmount?.gt(toTokenInfo.poolAmount?.sub(toTokenInfo.bufferAmount))
-      ? toTokenInfo.poolAmount?.sub(toTokenInfo.bufferAmount)
-      : toTokenInfo.availableAmount;
+    const value = toTokenInfo?.availableAmount?.gt(toTokenInfo?.poolAmount?.sub(toTokenInfo?.bufferAmount))
+      ? toTokenInfo?.poolAmount?.sub(toTokenInfo?.bufferAmount)
+      : toTokenInfo?.availableAmount;
 
     if (!value) {
       return bigNumberify(0);
@@ -388,6 +403,9 @@ export default function SwapBox(props) {
   }, [maxToTokenOut, toTokenAddress, infoTokens]);
 
   const maxFromTokenInUSD = useMemo(() => {
+    if (!fromTokenInfo) {
+      return bigNumberify(0);
+    }
     const value = fromTokenInfo.maxUsdqAmount
       ?.sub(fromTokenInfo.usdqAmount)
       .mul(expandDecimals(1, USD_DECIMALS))
@@ -401,7 +419,7 @@ export default function SwapBox(props) {
   }, [fromTokenInfo]);
 
   const maxFromTokenIn = useMemo(() => {
-    if (!fromTokenInfo.maxPrice) {
+    if (!fromTokenInfo || !fromTokenInfo.maxPrice) {
       return bigNumberify(0);
     }
     return maxFromTokenInUSD?.mul(expandDecimals(1, fromTokenInfo.decimals)).div(fromTokenInfo.maxPrice).toString();
@@ -436,7 +454,7 @@ export default function SwapBox(props) {
       isWaitingForApproval
     ) {
       setIsWaitingForApproval(false);
-      helperToast.success(<div>{fromToken.symbol} approved!</div>);
+      helperToast.success(<div>{fromToken?.symbol} approved!</div>);
     }
   }, [
     fromTokenAddress,
@@ -444,13 +462,13 @@ export default function SwapBox(props) {
     needApproval,
     prevNeedApproval,
     setIsWaitingForApproval,
-    fromToken.symbol,
+    fromToken?.symbol,
     isWaitingForApproval,
     fromToken,
   ]);
 
   useEffect(() => {
-    if (!toTokens.find((token) => token.address === toTokenAddress)) {
+    if (!toTokens.find((token) => token.address === toTokenAddress) && toTokens.length > 0) {
       setToTokenAddress(swapOption, toTokens[0].address);
     }
   }, [swapOption, toTokens, toTokenAddress, setToTokenAddress]);
@@ -818,7 +836,6 @@ export default function SwapBox(props) {
   };
 
   const getLeverageError = () => {
-
     if (!toAmount || toAmount.eq(0)) {
       return ["Enter an amount"];
     }
@@ -1044,7 +1061,7 @@ export default function SwapBox(props) {
     const swapTokenSymbol = isLong ? toToken.symbol : shortCollateralToken.symbol;
     const inputTokenSymbol = isLong ? fromToken.symbol : shortCollateralToken.symbol;
 
-      let quickswapUrl = `https://quickswap.exchange/#/swap`;
+    let quickswapUrl = `https://quickswap.exchange/#/swap`;
     let kyberswapUrl = `https://kyberswap.com/swap/polygon/${inputCurrency}-to-${outputCurrency}`;
     const label =
       modalError === "BUFFER" ? `${shortCollateralToken.symbol} Required` : `${fromToken.symbol} Capacity Reached`;
@@ -1061,8 +1078,13 @@ export default function SwapBox(props) {
             </p>
           )}
           <div style={{ display: "flex", alignItems: "center", flexDirection: "column", gap: "10px" }}>
-                    <a style={{ textDecoration: "none", color: "#ffaa27" }} href={quickswapUrl} target="_blank" rel="noreferrer">
-                        Buy {swapTokenSymbol} on Quickswap
+            <a
+              style={{ textDecoration: "none", color: "#ffaa27" }}
+              href={quickswapUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Buy {swapTokenSymbol} on Quickswap
             </a>
             {/* <a
               style={{ textDecoration: "none", color: "#ffaa27" }}
@@ -1767,10 +1789,18 @@ export default function SwapBox(props) {
     feeBps = feeBasisPoints;
   }
   if (fromAmount?.gt(bigNumberify(0))) {
-    if (isSwap && isMarketOrder) {executionFee = 0;}
-    if (isSwap && !isMarketOrder) {executionFee = getConstant(chainId, "SWAP_ORDER_EXECUTION_GAS_FEE");}
-    if (!isSwap && isMarketOrder) {executionFee = getConstant(chainId, "INCREASE_ORDER_EXECUTION_GAS_FEE");}
-    if (!isSwap && !isMarketOrder) {executionFee = minExecutionFee;}
+    if (isSwap && isMarketOrder) {
+      executionFee = 0;
+    }
+    if (isSwap && !isMarketOrder) {
+      executionFee = getConstant(chainId, "SWAP_ORDER_EXECUTION_GAS_FEE");
+    }
+    if (!isSwap && isMarketOrder) {
+      executionFee = getConstant(chainId, "INCREASE_ORDER_EXECUTION_GAS_FEE");
+    }
+    if (!isSwap && !isMarketOrder) {
+      executionFee = minExecutionFee;
+    }
 
     if (executionFee > 0) {
       executionFeeUsd = getUsd(executionFee, nativeTokenAddress, false, infoTokens);
@@ -1829,21 +1859,41 @@ export default function SwapBox(props) {
       <div className="Exchange-swap-box-inner App-box-highlight">
         <div>
           <Tab
-            options={SWAP_OPTIONS}
+            options={SWAP_OPTIONS.map((option) => {
+              return option === SWAP
+                ? {
+                    html: (
+                      <div className="Exchange-swap-tab-wrapper">
+                        <p>{option}</p>
+                        <small>({swapTypes[swapType]})</small>
+                      </div>
+                    ),
+                    value: option,
+                  }
+                : option;
+            })}
             option={swapOption}
             onChange={onSwapOptionChange}
             className="Exchange-swap-option-tabs tradePage"
           />
-          {flagOrdersEnabled && (
-            <Tab
-              options={orderOptions}
-              optionLabels={orderOptionLabels}
-              className="Exchange-swap-order-type-tabs"
-              type="inline"
-              option={orderOption}
-              onChange={onOrderOptionChange}
-            />
-          )}
+          <div className="Exchange-swap-types-wrapper">
+            <SwapDropdown swapType={swapType} setSwapType={setSwapType} />
+          </div>
+          <div className="Exchange-swap-menu">
+            {flagOrdersEnabled &&
+              (!isSwap || swapType === SWAP_PERPS ? (
+                <Tab
+                  options={orderOptions}
+                  optionLabels={orderOptionLabels}
+                  className="Exchange-swap-order-type-tabs"
+                  type="inline"
+                  option={orderOption}
+                  onChange={onOrderOptionChange}
+                />
+              ) : (
+                <div style={{ margin: "10px 0" }} />
+              ))}
+          </div>
         </div>
         {showFromAndToSection && (
           <React.Fragment>
@@ -1890,13 +1940,15 @@ export default function SwapBox(props) {
                     showMintingCap={false}
                     showTokenImgInDropdown={true}
                     showSymbolImage={true}
+                    quickswapTokens={quickswapTokens}
+                    isQSSwap={isQSSwap}
                   />
                 </div>
               </div>
             </div>
             <div className="Exchange-swap-ball-container">
               <div className="Exchange-swap-ball" onClick={switchTokens}>
-                <img src={arrowIcon} alt="arrowIcon"/>
+                <img src={arrowIcon} alt="arrowIcon" />
               </div>
             </div>
             <div className="Exchange-swap-section">
@@ -1937,6 +1989,8 @@ export default function SwapBox(props) {
                     infoTokens={infoTokens}
                     showTokenImgInDropdown={true}
                     showSymbolImage={true}
+                    quickswapTokens={quickswapTokens}
+                    isQSSwap={isQSSwap}
                   />
                 </div>
               </div>
@@ -2018,38 +2072,49 @@ export default function SwapBox(props) {
             </div>
           </div>
         )}
-        {isSwap && (
+        {isSwap && swapType === SWAP_PERPS && (
           <div className="Exchange-swap-box-info">
             <ExchangeInfoRow label="Fees">
               <div>
                 {!fees && "-"}
-                {fees && (<>
-                  <Tooltip
-                    handle={`$${formatAmount(totalFeesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)}`}
-                    position="right-bottom"
-                    renderContent={() => {
-                      return (
-                        <>
-                          <div>
-                            Swap Fee ({formatAmount(feeBps, 2, 2, false)}% of swap size):
-                            &nbsp; {formatAmount(fees, fromToken.decimals, 4, true)}
-                            &nbsp; {fromToken.symbol}
-                            &nbsp; (${formatAmount(feesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
-                          </div>
-                          {isMarketOrder ? <></> : (<>
-                            <br />
+                {fees && (
+                  <>
+                    <Tooltip
+                      handle={`$${formatAmount(totalFeesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)}`}
+                      position="right-bottom"
+                      renderContent={() => {
+                        return (
+                          <>
                             <div>
-                              Execution Fee: &nbsp;
-                              {formatAmount(executionFee, nativeTokenSymbol.decimals, nativeTokenSymbol.displayDecimals, true)}
-                              &nbsp; {nativeTokenSymbol}
-                              &nbsp; (${formatAmount(executionFeeUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
-                            </div></>)
-                          }
-                        </>
-                      );
-                    }}
-                  />
-                </>)}
+                              Swap Fee ({formatAmount(feeBps, 2, 2, false)}% of swap size): &nbsp;{" "}
+                              {formatAmount(fees, fromToken.decimals, 4, true)}
+                              &nbsp; {fromToken.symbol}
+                              &nbsp; (${formatAmount(feesUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
+                            </div>
+                            {isMarketOrder ? (
+                              <></>
+                            ) : (
+                              <>
+                                <br />
+                                <div>
+                                  Execution Fee: &nbsp;
+                                  {formatAmount(
+                                    executionFee,
+                                    nativeTokenSymbol.decimals,
+                                    nativeTokenSymbol.displayDecimals,
+                                    true
+                                  )}
+                                  &nbsp; {nativeTokenSymbol}
+                                  &nbsp; (${formatAmount(executionFeeUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
+                                </div>
+                              </>
+                            )}
+                          </>
+                        );
+                      }}
+                    />
+                  </>
+                )}
               </div>
             </ExchangeInfoRow>
           </div>
@@ -2197,7 +2262,12 @@ export default function SwapBox(props) {
                           <br />
                           <div>
                             Execution Fee: &nbsp;
-                            {formatAmount(executionFee, nativeTokenSymbol.decimals, nativeTokenSymbol.displayDecimals, true)}
+                            {formatAmount(
+                              executionFee,
+                              nativeTokenSymbol.decimals,
+                              nativeTokenSymbol.displayDecimals,
+                              true
+                            )}
                             &nbsp; {nativeTokenSymbol}
                             &nbsp; (${formatAmount(executionFeeUsd, USD_DECIMALS, USD_DISPLAY_DECIMALS, true)})
                           </div>
@@ -2230,11 +2300,7 @@ export default function SwapBox(props) {
           </div>
         )}
         <div className="Exchange-swap-button-container">
-          <button
-            className="App-cta Exchange-swap-button"
-            onClick={onClickPrimary}
-            disabled={!isPrimaryEnabled()}
-          >
+          <button className="App-cta Exchange-swap-button" onClick={onClickPrimary} disabled={!isPrimaryEnabled()}>
             {getPrimaryText()}
           </button>
         </div>

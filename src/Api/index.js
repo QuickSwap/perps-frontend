@@ -100,8 +100,32 @@ export function useQuickInfo(chainId) {
   return res ? res.data.token : null;
 }
 
-export function useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo, vaultPropsLength) {
-  const tokens = getTokens(chainId);
+export function useQuickV3Pair(chainId, token0Address, token1Address) {
+  const query = gql(`query pairs {
+    pairs0: pools(where: {token0: "${token0Address.toLowerCase()}", token1: "${token1Address.toLowerCase()}"}) {
+      id
+    }
+    pairs1: pools(where: {token0: "${token1Address.toLowerCase()}", token1: "${token0Address.toLowerCase()}"}) {
+      id
+    }
+  }`);
+
+  const [res, setRes] = useState();
+
+  useEffect(() => {
+    getQuickGraphClient(chainId).query({ query }).then(setRes).catch(console.warn);
+  }, [query, chainId]);
+
+  const pairs = res && res.data ? res.data.pairs0.concat(res.data.pairs1) : undefined;
+  if (!pairs || pairs.length === 0) return null;
+  const pairId = pairs[0].id;
+  const tokenReversed = res.data.pairs1.length > 0;
+
+  return {pairId, tokenReversed}
+}
+
+export function useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo, vaultPropsLength, quickswapTokens, isQSSwap) {
+  const tokens = isQSSwap ? quickswapTokens : getTokens(chainId);
   const vaultReaderAddress = getContract(chainId, "VaultReader");
   const vaultAddress = getContract(chainId, "Vault");
   const positionRouterAddress = getContract(chainId, "PositionRouter");

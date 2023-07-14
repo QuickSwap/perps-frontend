@@ -26,12 +26,14 @@ import {
   useChainId,
   useAccountOrders,
   getPageTitle,
+  SWAP_QUICK_BEST_TRADE,
+  SWAP_QUICK_V3,
 } from "../../Helpers";
 import { getConstant } from "../../Constants";
 import { approvePlugin, useInfoTokens, useMinExecutionFee, cancelMultipleOrders } from "../../Api";
 
 import { getContract } from "../../Addresses";
-import { getTokens, getToken, getWhitelistedTokens, getTokenBySymbol } from "../../data/Tokens";
+import { getTokens, getToken, getWhitelistedTokens, getTokenBySymbol, getQuickSwapTokens } from "../../data/Tokens";
 
 import Reader from "../../abis/Reader.json";
 import Vault from "../../abis/Vault.json";
@@ -371,6 +373,7 @@ export const Exchange = forwardRef((props, ref) => {
 
   const [pendingPositions, setPendingPositions] = useState({});
   const [updatedPositions, setUpdatedPositions] = useState({});
+  const [swapType, setSwapType] = useState(SWAP_QUICK_BEST_TRADE);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -457,12 +460,31 @@ export const Exchange = forwardRef((props, ref) => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [isPendingConfirmation, setIsPendingConfirmation] = useState(false);
 
-  const tokens = getTokens(chainId);
+  const isQSSwap = swapType === SWAP_QUICK_V3 || swapType === SWAP_QUICK_BEST_TRADE;
+  const [quickswapTokens, setQuickswapTokens] = useState([]);
+  const perpsTokens = getTokens(chainId);
+  const tokens = isQSSwap ? quickswapTokens : perpsTokens;
 
   const tokenAddresses = tokens.map((token) => token.address);
-  const { data: tokenBalances } = useSWR(active && [active, chainId, readerAddress, "getTokenBalances", account], {
+  const { data: tokenBalances } = useSWR(
+    active && [
+      `${isQSSwap ? "QuickswapBalances" : "PerpsBalances"}${active}${tokenAddresses.length}`,
+      chainId,
+      readerAddress,
+      "getTokenBalances",
+      account,
+    ],
+    {
       fetcher: fetcher(library, Reader, [tokenAddresses]),
-  });
+    }
+  );
+
+  useEffect(() => {
+    (async () => {
+      const qsTokens = await getQuickSwapTokens(chainId);
+      setQuickswapTokens(qsTokens);
+    })();
+  }, [chainId]);
 
   const { data: positionData, error: positionDataError } = useSWR(
     active && [active, chainId, readerAddress, "getPositions", vaultAddress, account],
@@ -478,8 +500,8 @@ export const Exchange = forwardRef((props, ref) => {
   const positionsDataIsLoading = active && !positionData && !positionDataError;
 
   const { data: fundingRateInfo } = useSWR([active, chainId, readerAddress, "getFundingRates"], {
-      dedupingInterval: 20000,
-      fetcher: fetcher(library, Reader, [vaultAddress, nativeTokenAddress, whitelistedTokenAddresses]),
+    dedupingInterval: 20000,
+    fetcher: fetcher(library, Reader, [vaultAddress, nativeTokenAddress, whitelistedTokenAddresses]),
   });
 
   const { data: totalTokenWeights } = useSWR(
@@ -512,7 +534,16 @@ export const Exchange = forwardRef((props, ref) => {
     }
   );
 
-  const { infoTokens } = useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo);
+  const { infoTokens } = useInfoTokens(
+    library,
+    chainId,
+    active,
+    tokenBalances,
+    fundingRateInfo,
+    undefined,
+    quickswapTokens,
+    isQSSwap
+  );
   const { minExecutionFee, minExecutionFeeUSD, minExecutionFeeErrorMessage } = useMinExecutionFee(
     library,
     active,
@@ -658,7 +689,7 @@ export const Exchange = forwardRef((props, ref) => {
       } within the allowed slippage, you can adjust the allowed slippage in the settings on the top right of the page.`;
 
       pushErrorNotification(chainId, message, e);
-      
+
       showModal(<TradeFailed />);
 
       const key = getPositionKey(account, path[path.length - 1], indexToken, isLong);
@@ -692,7 +723,7 @@ export const Exchange = forwardRef((props, ref) => {
       } within the allowed slippage, you can adjust the allowed slippage in the settings on the top right of the page.`;
 
       pushErrorNotification(chainId, message, e);
-      
+
       showModal(<TradeFailed />);
 
       const key = getPositionKey(account, path[path.length - 1], indexToken, isLong);
@@ -796,7 +827,13 @@ export const Exchange = forwardRef((props, ref) => {
     listSection = LIST_SECTIONS[0];
   }
 
-  if (!getToken(chainId, toTokenAddress)) {
+  useEffect(() => {
+    if (!isQSSwap && !getToken(chainId, toTokenAddress)) {
+      setToTokenAddress(swapOption, perpsTokens[0].address);
+    }
+  }, [isQSSwap, chainId, toTokenAddress]);
+
+  if (!isQSSwap && !getToken(chainId, toTokenAddress)) {
     return null;
   }
 
@@ -829,13 +866,12 @@ export const Exchange = forwardRef((props, ref) => {
           />
           <div className="align-right Exchange-should-show-position-lines">
             {renderCancelOrderButton()}
-            <span style={{marginRight:"8px"}}>Chart Positions</span>
+            <span style={{ marginRight: "8px" }}>Chart Positions</span>
             <Checkbox
               isChecked={savedShouldShowPositionLines}
               setIsChecked={setSavedShouldShowPositionLines}
               className={cx("chart-positions", { active: savedShouldShowPositionLines })}
-            >
-            </Checkbox>
+            ></Checkbox>
           </div>
         </div>
         {listSection === "Positions" && (
@@ -924,12 +960,13 @@ export const Exchange = forwardRef((props, ref) => {
         savedShouldShowPositionLines={savedShouldShowPositionLines}
         orders={orders}
         setToTokenAddress={setToTokenAddress}
+        isQSSwap={isQSSwap}
       />
     );
   };
 
   return (
-    <div className="Exchange page-layout" style={{marginTop:12}}>
+    <div className="Exchange page-layout" style={{ marginTop: 12 }}>
       <div className="Exchange-content">
         <div className="Exchange-left">
           {renderChart()}
@@ -983,6 +1020,9 @@ export const Exchange = forwardRef((props, ref) => {
             minExecutionFeeUSD={minExecutionFeeUSD}
             minExecutionFeeErrorMessage={minExecutionFeeErrorMessage}
             showModal={showModal}
+            swapType={swapType}
+            setSwapType={setSwapType}
+            quickswapTokens={quickswapTokens}
           />
           <div className="Exchange-wallet-tokens">
             <div className="Exchange-wallet-tokens-content">

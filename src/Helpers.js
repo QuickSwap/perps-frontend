@@ -18,6 +18,11 @@ import useWeb3Onboard from "./hooks/useWeb3Onboard";
 
 const { AddressZero } = ethers.constants;
 
+export const swapTypes = ['Best Trade', 'V3', 'Perps'];
+export const SWAP_QUICK_BEST_TRADE = 0;
+export const SWAP_QUICK_V3 = 1;
+export const SWAP_PERPS = 2;
+
 export const UI_VERSION = "1.3";
 
 // use a random placeholder account instead of the zero address as the zero address might have tokens
@@ -347,7 +352,7 @@ export function getServerUrl(chainId, path) {
 export function isTriggerRatioInverted(fromTokenInfo, toTokenInfo) {
   if (!toTokenInfo || !fromTokenInfo) return false;
   if (toTokenInfo.isStable || toTokenInfo.isUsdq) return true;
-  if (toTokenInfo.maxPrice) return toTokenInfo.maxPrice.lt(fromTokenInfo.maxPrice);
+  if (toTokenInfo.maxPrice && fromTokenInfo.maxPrice) return toTokenInfo.maxPrice.lt(fromTokenInfo.maxPrice);
   return false;
 }
 

@@ -4,13 +4,13 @@
 
 .Disclaimer-row {
   font-size: 0.875rem;
-  color: #C7CAD9;
+  color: #c7cad9;
 }
 
 .Disclaimer-checkbox {
   display: flex;
   gap: 1.25rem;
-  align-items: start;
+  align-items: flex-start;
 }
 
 @media (max-width: 700px) {

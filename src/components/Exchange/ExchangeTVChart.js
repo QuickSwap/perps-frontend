@@ -14,8 +14,9 @@ import {
   usePrevious,
   getLiquidationPrice,
   useLocalStorageSerializeKey,
+  isAddressZero,
 } from "../../Helpers";
-import { useChartPrices } from "../../Api";
+import { useChartPrices, useQuickV3Pair } from "../../Api";
 
 import { getTokens, getToken } from "../../data/Tokens";
 import ChartTokenSelector from "./ChartTokenSelector";
@@ -68,6 +69,7 @@ export default function ExchangeTVChart(props) {
     orders,
     infoTokens,
     setToTokenAddress,
+    isQSSwap
   } = props;
 
   const { library, account, active } = useWeb3Onboard();
@@ -82,6 +84,10 @@ export default function ExchangeTVChart(props) {
   const fromToken = getTokenInfo(infoTokens, fromTokenAddress);
   const toToken = getTokenInfo(infoTokens, toTokenAddress);
 
+  const fromTokenAddressChart = isAddressZero(fromTokenAddress) ? "0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9" : fromTokenAddress;
+  const toTokenAddressChart = isAddressZero(toTokenAddress) ? "0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9" : toTokenAddress;
+  const qsTokenPair = useQuickV3Pair(chainId, fromTokenAddressChart, toTokenAddressChart);
+
   const [chartToken, setChartToken] = useState({
     maxPrice: null,
     minPrice: null,
@@ -91,7 +97,7 @@ export default function ExchangeTVChart(props) {
   const previousMarketName = usePrevious(marketName);
 
   const currentAveragePrice =
-    chartToken.maxPrice && chartToken.minPrice ? chartToken.maxPrice.add(chartToken.minPrice).div(2) : null;
+    chartToken && chartToken.maxPrice && chartToken.minPrice ? chartToken.maxPrice.add(chartToken.minPrice).div(2) : null;
 
   const averagePriceValue = currentAveragePrice
     ? parseFloat(formatAmount(currentAveragePrice, USD_DECIMALS, chartToken.displayDecimals))
@@ -132,8 +138,8 @@ export default function ExchangeTVChart(props) {
 
   const [priceData, updatePriceData] = useChartPrices(
     chainId,
-    chartToken.symbol,
-    chartToken.isStable,
+    chartToken?.symbol,
+    chartToken?.isStable,
     period,
     currentAveragePrice
   );
@@ -329,8 +335,20 @@ export default function ExchangeTVChart(props) {
     setChartToken(tmp);
     setToTokenAddress(swapOption, token.address);
   };
-
+  
   const renderChart = () => {
+    if (isQSSwap) {
+      if (!qsTokenPair) return <></>;
+      return (
+        <iframe
+          title="Quickswap Chart"
+          src={`https://mode.quickswap.exchange?pairAddress=${qsTokenPair.pairId}&pairName=${fromToken.symbol}/${toToken.symbol}&tokenReversed=${qsTokenPair.tokenReversed}&chainId=${chainId}&isV3=true`}
+          height='100%'
+          width='100%'
+          style={{ border: 'none' }}
+        />
+      );
+    }
     return <TVChartContainer symbol={symbolName} />;
   };
 
